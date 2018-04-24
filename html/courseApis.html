@@ -9,11 +9,13 @@
     <p>Course Title:</p>
     <input type="text" id="courseTitle">
     <p>Description:</p>
-    <input type="text" id="courseDes" style="height:100px; width: 200px">
+    <textarea id="courseDes" rows="10" cols="50"></textarea>
     <p>Topics</p>
     <button type="button" id="addTopic">Add a Topic</button>
     <div id="addTopicDiv"></div>
     <div id="topicDetail"></div>
+    <hr>
+    <button type="button" id="createCourse">Create</button>
   </body>
   <script type="text/javascript">
     var topicCount = 0;
@@ -40,6 +42,44 @@
       var thisTopicDiv = "#"+$(this).parent()[0].id;
       $(thisTopicDiv).remove();
       // console.log($(this).parent()[0].id);
+    });
+    $("#createCourse").click(function() {
+      var courseTitle = $("#courseTitle").val();
+      var courseDescription = $("#courseDes").val();
+      if(topicCount) {
+        var topics = new Array(topicCount);
+        for (var i = 0; i < topicCount; i++) {
+          var topicId = "#topic"+(i+1);
+          topics[i] = {
+            "topicTitle": $(topicId).children("p").text()
+          };
+        }
+      }
+      else {
+        topics = [];
+      }
+      data = {
+        "userId": "42124943tq87ds126137",
+        "courseTitle": courseTitle,
+        "courseDescription": courseDescription,
+        "topics": {
+          "count": topicCount,
+          "details": topics
+        }
+      }
+      $.ajax({
+        type: 'POST',
+        url: 'http://127.0.0.1:8000/createCourse',
+        data: JSON.stringify(data),
+        success: function(resp) {
+          console.log(resp.courseId, resp.courseDetail);
+        },
+        contentType: "application/json",
+        dataType: "json"
+      });
+      // $.post("http://127.0.0.1:8000/createCourse", data, function(resp) {
+      //   console.log(resp.courseId, resp.courseDetail);
+      // }, "json");
     });
     // $("#saveTopic").click(function() {
       // save topic 按钮点击
