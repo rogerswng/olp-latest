@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Course Api</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+  </head>
+  <body>
+    <p>Course Title:</p>
+    <input type="text" id="courseTitle">
+    <p>Description:</p>
+    <input type="text" id="courseDes" style="height:100px; width: 200px">
+    <p>Topics</p>
+    <button type="button" id="addTopic">Add a Topic</button>
+    <div id="addTopicDiv"></div>
+    <div id="topicDetail"></div>
+  </body>
+  <script type="text/javascript">
+    var topicCount = 0;
+    $("#addTopic").click(function() {
+      // add topic 按钮点击
+      $("#addTopicDiv").append("<input type='text', id='topicTitle'>");
+      $("#addTopicDiv").append("<button type='button' id='saveTopic'>Save</button>");
+      $("#addTopicDiv").append("<button type='button' id='cancelTopic'>Cancel</button>");
+    });
+    $("#saveTopic").click(function() {
+      // save topic 按钮点击
+      topicCount = topicCount + 1;
+      var topicTitle = $("#topicTitle").val();
+      var thisTopicDiv = "#topic"+topicCount;
+      $("#addTopicDiv").html("");
+      $("#topicDetail").append("<div id='topic"+topicCount+"'>");
+      $(thisTopicDiv).append("<p>"+topicTitle+"</p>");
+      $(thisTopicDiv).append("<button type='button' class='deleteTopic' topicId="+topicCount+">Delete</button>");
+    });
+    $("#cancelTopic").click(function() {
+      // cancel topic 按钮点击
+      $("#addTopicDiv").html("");
+    });
+    $(".deleteTopic").click(function() {
+      var thisTopicDiv = $(this).parent();
+    })
+  </script>
+</html>
