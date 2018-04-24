@@ -23,7 +23,7 @@
       $("#addTopicDiv").append("<button type='button' id='saveTopic'>Save</button>");
       $("#addTopicDiv").append("<button type='button' id='cancelTopic'>Cancel</button>");
     });
-    $("#saveTopic").click(function() {
+    $("#addTopicDiv").on("click", "#saveTopic", function() {
       // save topic 按钮点击
       topicCount = topicCount + 1;
       var topicTitle = $("#topicTitle").val();
@@ -33,12 +33,30 @@
       $(thisTopicDiv).append("<p>"+topicTitle+"</p>");
       $(thisTopicDiv).append("<button type='button' class='deleteTopic' topicId="+topicCount+">Delete</button>");
     });
-    $("#cancelTopic").click(function() {
-      // cancel topic 按钮点击
+    $("#addTopicDiv").on("click", "#cancelTopic", function() {
       $("#addTopicDiv").html("");
     });
-    $(".deleteTopic").click(function() {
-      var thisTopicDiv = $(this).parent();
-    })
+    $("#topicDetail").on("click", ".deleteTopic", function() {
+      var thisTopicDiv = "#"+$(this).parent()[0].id;
+      $(thisTopicDiv).remove();
+      // console.log($(this).parent()[0].id);
+    });
+    // $("#saveTopic").click(function() {
+      // save topic 按钮点击
+    //   topicCount = topicCount + 1;
+    //   var topicTitle = $("#topicTitle").val();
+    //   var thisTopicDiv = "#topic"+topicCount;
+    //   $("#addTopicDiv").html("");
+    //   $("#topicDetail").append("<div id='topic"+topicCount+"'>");
+    //   $(thisTopicDiv).append("<p>"+topicTitle+"</p>");
+    //   $(thisTopicDiv).append("<button type='button' class='deleteTopic' topicId="+topicCount+">Delete</button>");
+    // });
+    // $("#cancelTopic").click(function() {
+    //   // cancel topic 按钮点击
+    //   $("#addTopicDiv").html("");
+    // });
+    // $(".deleteTopic").click(function() {
+    //   var thisTopicDiv = $(this).parent();
+    // })
   </script>
 </html>
