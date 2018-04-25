@@ -102,26 +102,56 @@
       $.ajax({
         type: 'GET',
         url: 'http://127.0.0.1:8000/teacherCourseList',
-        data: JSON.stringify(data),
+        data: data,
         success: function(resp) {
-          console.log(resp)
-          // var courseContentList = $("#courseList");
-          // var courseCount = resp.count;
-          // var courseDetail = resp.courses;
-          // for(var i = 0; i < courseCount; i++) {
-          //   var courseTitle = "Title: "+courseDetail[i].title;
-          //   var topicCount = courseDetail[i].count;
-          //   var topicList = courseDetail[i].topicList;
-          //   courseContentList.append("<li>"+courseTitle+"</li>");
-          //   for(var j = 0; j < topicCount; j++) {
-          //     var topicTitle = "Topic "+(j+1)+": "+topicList[j];
-          //     courseContentList.append("<li>"+topicTitle+"</li>");
-          //   }
-          // }
+          //console.log(resp)
+          var courseContentList = $("#courseList");
+          var courseCount = resp.count;
+          var courseDetail = resp.courses;
+          for(var i = 0; i < courseCount; i++) {
+            var courseTitle = "Title: "+courseDetail[i].title;
+            var topicCount = courseDetail[i].count;
+            var topicList = courseDetail[i].topicList;
+            courseContentList.append("<li>"+courseTitle+"</li>");
+            for(var j = 0; j < topicCount; j++) {
+              var topicTitle = "Topic "+(j+1)+": "+topicList[j];
+              courseContentList.append("<li>"+topicTitle+"</li>");
+            }
+          }
         },
-        contentType: "application/json",
+        //contentType: "application/json",
         dataType: "json"
-      })
+      });
+    });
+    $("#getStudentCourseList").click(function() {
+      data = {
+        "userId": staticUserId,
+        "character": 0
+      };
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8000/studentCourseList',
+        data: data,
+        success: function(resp) {
+          var courseContentList = $("#courseList");
+          var courseCount = resp.count;
+          var courseDetail = resp.courses;
+          for(var i = 0; i < courseCount; i++) {
+            var courseTitle = "Title: "+courseDetail[i].title;
+            var courseDescription = "Description: "+courseDetail[i].description;
+            var courseId = "Course ID: "+courseDetail[i].id;
+            var teacher = "Teacher ID: "+courseDetail[i].teacher;
+            courseContentList.append("<li>"+courseTitle+"</li>");
+            courseContentList.append("<li>"+courseDescription+"</li>");
+            courseContentList.append("<li>"+courseId+"</li>");
+            courseContentList.append("<li>"+teacher+"</li>");
+          }
+        },
+        dataType: "json"
+      });
+    });
+    $("#flush").click(function() {
+      $("#courseList").html("");
     })
   </script>
 </html>
