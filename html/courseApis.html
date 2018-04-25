@@ -104,19 +104,20 @@
         url: 'http://127.0.0.1:8000/teacherCourseList',
         data: JSON.stringify(data),
         success: function(resp) {
-          var courseContentList = $("#courseList");
-          var courseCount = resp.count;
-          var courseDetail = resp.courses;
-          for(var i = 0; i < courseCount; i++) {
-            var courseTitle = "Title: "+courseDetail[i].title;
-            var topicCount = courseDetail[i].count;
-            var topicList = courseDetail[i].topicList;
-            courseContentList.append("<li>"+courseTitle+"</li>");
-            for(var j = 0; j < topicCount; j++) {
-              var topicTitle = "Topic "+(j+1)+": "+topicList[j];
-              courseContentList.append("<li>"+topicTitle+"</li>");
-            }
-          }
+          console.log(resp)
+          // var courseContentList = $("#courseList");
+          // var courseCount = resp.count;
+          // var courseDetail = resp.courses;
+          // for(var i = 0; i < courseCount; i++) {
+          //   var courseTitle = "Title: "+courseDetail[i].title;
+          //   var topicCount = courseDetail[i].count;
+          //   var topicList = courseDetail[i].topicList;
+          //   courseContentList.append("<li>"+courseTitle+"</li>");
+          //   for(var j = 0; j < topicCount; j++) {
+          //     var topicTitle = "Topic "+(j+1)+": "+topicList[j];
+          //     courseContentList.append("<li>"+topicTitle+"</li>");
+          //   }
+          // }
         },
         contentType: "application/json",
         dataType: "json"
