@@ -3,15 +3,16 @@
 from flask import request
 from flask.ext.restful import Resource
 from uuid import uuid4
+from app import db
 
-tableCourse = {}
-# courseId: {courseTitle, courseDescription, teacherId}
-tableCourseStudent = {}
-#
-tableCourseTeacher = {}
-# userId: List<courseId>
-tableTopicCourse = {}
-# courseId: List<topicId>, topicId: {courseId, topicTitle}
+# tableCourse = {}
+# # courseId: {courseTitle, courseDescription, teacherId}
+# tableCourseStudent = {}
+# #
+# tableCourseTeacher = {}
+# # userId: List<courseId>
+# tableTopicCourse = {}
+# # courseId: List<topicId>, topicId: {courseId, topicTitle}
 
 
 class CreateCourse(Resource):
