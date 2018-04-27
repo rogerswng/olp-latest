@@ -57,6 +57,11 @@ class Mysql(object):
             )
         return __pool.connection()
 
+    def __getInsertId(self):
+        self._cursor.execute("select @@IDENTITY as id")
+        result = self._cursor.fetchall()
+        return result[0]['id']
+
     def getAll(self, sql, params=None):
         """
             @Summary: 返回所有的查询结果
@@ -109,4 +114,43 @@ class Mysql(object):
         else:
             return False
 
-    def
+    def insertOne(self, sql, params):
+        """
+            @Summary: 插入 1 条
+            @param sql: insert sql statement
+            @param params: 插入参数
+            @return insertion id
+        """
+        self._cursor.execute(sql, params)
+        return self.__getInsertId()
+
+    def insertMany(self, sql, params):
+        """
+            @Summary: 插入多条
+            @param sql: insert sql statement
+            @param params: 参数
+            @return insertion row affected count
+        """
+        count = self._cursor.executemany(sql, params)
+        return count
+
+    def delete(self, sql, params=None):
+        """
+            @Summary: 删除
+            @param sql, params
+            @return deletion row affected count
+        """
+        if params is None:
+            count = self._cursor.execute(sql)
+        else:
+            count = self._cursor.execute(sql, params)
+        return count
+
+    def modify(self, sql, params):
+        """
+            @Summary: 修改某条记录
+            @param sql, params
+            @return row affected count
+        """
+        count = self._cursor.execute(sql, params)
+        return count

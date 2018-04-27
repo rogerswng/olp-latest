@@ -124,15 +124,15 @@ class DbInitilization(object):
         )
         self._cursor = self._conn.cursor()
 
-    def createTable(self, sql, params):
+    def createTable(self, sql):
         """
             @Summary: Create table
             @param sql, params
             @return Row affected counts
         """
-        count = self._cursor.execute(sql, params)
+        count = self._cursor.execute(sql)
         return count
 
 if __name__ == "__main__":
     db = DbInitilization()
-    db.createTable()
+    db.createTable(userSql)
