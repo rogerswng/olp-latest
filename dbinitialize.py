@@ -4,27 +4,30 @@
     初始化数据库
     建数据库
     建数据库表
+    PyMySQL Module 支持 MySQL 5.x，不支持 8.x
 """
 
 import pymysql
 
 config = {
-    "host": "localhost",
-    "port": "3306",
+    "host": "127.0.0.1",
+    "port": 3306,
     "user": "root",
-    "passwd": "rootroot",
-    "name": "olp",
-    "charset": "utf8"
+    "database": "olp",
+    "charset": "utf8mb4"
 }
 
 userSql = """
     create table if not exists `User` (
         `user_id` bigint unsigned not null,
         `school_id` bigint unsigned not null,
+        `password` varchar(20) not null,
         `character` int unsigned not null,
         primary key (`user_id`)
     )engine=InnoDB default charset=utf8;
 """
+
+# User 表 character 0-student, 1-teacher
 
 courseSql = """
     create table if not exists `Course` (
@@ -55,6 +58,7 @@ sectionSql = """
         primary key (`section_id`)
     )engine=InnoDB default charset=utf8;
 """
+# entity_type  0-video, 1-doc, 2-attachment
 
 entitySql = """
     create table if not exists `Entity` (
@@ -66,13 +70,15 @@ entitySql = """
         primary key (`entity_id`)
     )engine=InnoDB default charset=utf8;
 """
+# url video, attachment
+# content doc-html
 
 studentCourseSql = """
     create table if not exists `StudentCourse` (
         `student_id` bigint unsigned not null,
         `course_id` bigint unsigned not null,
         `status` int unsigned not null,
-        `last_section_id` bigint unsigned not null,
+        `last_section_id` bigint unsigned,
         primary key (`student_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -82,6 +88,9 @@ practiceSql = """
         `practice_id` bigint unsigned not null,
         `title` text not null,
         `teacher_id` bigint unsigned not null,
+        `topic_id` bigint unsigned,
+        `section_id` bigint unsigned,
+        `course_id` bigint unsigned,
         primary key (`practice_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -89,9 +98,12 @@ practiceSql = """
 problemSql = """
     create table if not exists `Problem` (
         `problem_id` bigint unsigned not null,
+        `position` int unsigned,
         `content` text,
         `choices` longtext,
         `answer` text,
+        `comment` text,
+        `practice_id` bigint unsigned not null,
         primary key (`problem_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -102,6 +114,8 @@ studentPracticeSql = """
         `pracitce_id` bigint unsigned not null,
         `status` int unsigned not null,
         `draft` longtext,
+        `score` int unsigned,
+        `duration` int unsigned,
         primary key (`student_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -114,14 +128,7 @@ class DbInitilization(object):
         """
             Connect Database and get cursor
         """
-        self._conn = pymysql.Connect(
-            host=config['host'],
-            port=config['port'],
-            user=config['user'],
-            passwd=config['passwd'],
-            name=config['name'],
-            charset=config['charset']
-        )
+        self._conn = pymysql.Connect(**config)
         self._cursor = self._conn.cursor()
 
     def createTable(self, sql):
@@ -131,8 +138,16 @@ class DbInitilization(object):
             @return Row affected counts
         """
         count = self._cursor.execute(sql)
-        return count
+        return "success"
 
 if __name__ == "__main__":
     db = DbInitilization()
     db.createTable(userSql)
+    db.createTable(courseSql)
+    db.createTable(topicSql)
+    db.createTable(sectionSql)
+    db.createTable(entitySql)
+    db.createTable(studentCourseSql)
+    db.createTable(practiceSql)
+    db.createTable(problemSql)
+    db.createTable(studentPracticeSql)
