@@ -6,14 +6,19 @@ from uuid import uuid4
 from app import db
 import snowflake.client
 
-# tableCourse = {}
-# # courseId: {courseTitle, courseDescription, teacherId}
-# tableCourseStudent = {}
-# #
-# tableCourseTeacher = {}
-# # userId: List<courseId>
-# tableTopicCourse = {}
-# # courseId: List<topicId>, topicId: {courseId, topicTitle}
+# -*- API LIST -*-
+
+# POST /api/createCourse {userId, courseTitle, courseDescription, topicCount, topics{topicTitle}}
+# PUT /api/editCourse {courseId, title, description}
+# GET /api/envalidCourse {state, courseId}
+# GET /api/teacherCourseList {userId, character}
+# GET /api/studentCourseList {userId, character}
+# POST /api/editTopic {courseId, title}
+# PUT /api/editTopic {topicId, title}
+# DELETE /api/editTopic {topicId}
+# POST /api/editSection {userId, courseId, topicId, sectionTitle, entityType, entityId}
+# PUT /api/editSection {userId, courseId, topicId, sectionTitle, entityType, entityId}
+# DELETE /api/editSection {sectionId}
 
 def get_id():
     return snowflake.client.get_guid()
@@ -79,6 +84,45 @@ class CreateCourse(Resource):
             "location": "/courseList"
         }
         return respData
+
+class EditCourse(Resource):
+    # Edit course
+    def put(self):
+        data = request.get_json() or request.form
+        courseId = data['courseId']
+        title = data['title']
+        description = data['description']
+
+        db.modify(
+            """
+            update Course set title=%s, description=%s where course_id=%s;
+            """,
+            (title, description, courseId)
+        )
+
+        return {
+            "state": "success"
+        }
+
+class EnvalidCourse(Resource):
+    # 上线/下线课程
+    def get(self):
+        state = request.args.get("state")
+        courseId = request.args.get("courseId")
+
+        cur = 1 if state == False else 0
+
+        db.modify(
+            """
+            update Course set is_valid=%s where course_id=%s;
+            """,
+            (cur, courseId)
+        )
+
+        return {
+            "state": "success",
+            "cur": True if cur == 1 else False
+        }
 
 class TeacherCourseList(Resource):
     # Fetch 课程列表
@@ -218,7 +262,7 @@ class StudentCourseList(Resource):
         }
         return respData
 
-class EditTopic(object):
+class EditTopic(Resource):
     # 编辑章节
     def post(self):
         data = request.get_json() or request.form
@@ -266,6 +310,7 @@ class EditTopic(object):
 
     def delete(self):
         topicId = request.args.get("topicId")
+        courseId = request.args.get("courseId")
 
         res = db.delete(
             """
@@ -295,7 +340,139 @@ class EditTopic(object):
                     """,
                     (sectionIds[i]['section_id'],)
                 )
+            db.modify(
+                """
+                update Course set topic_count=topic_count-1, section_count=section_count-%s;
+                """
+            )
 
             return {
                 "state": "success"
             }
+
+class EditSection(Resource):
+    # 编辑小节
+    def post(self):
+        data = request.get_json() or request.form
+        userId = data['userId']
+        courseId = data['courseId']
+        topicId = data['topicId']
+        sectionTitle = data['sectionTitle']
+        entityType = data['entityType']
+        entityId = data['entityId']
+
+        sectionId = get_id()
+        if entityId != '':
+            db.insertOne(
+                """
+                insert into Section (section_id, title, topic_id, entity_type, entity_id)
+                values
+                (%s, %s, %s, %s, %s);
+                """,
+                (sectionId, sectionTitle, topicId, entityType, entityId)
+            )
+            db.modify(
+                """
+                update Topic set section_count=section_count+1 where topic_id=%s;
+                """,
+                (topicId,)
+            )
+            db.modify(
+                """
+                update Course set section_count=section_count+1 where course_id=%s;
+                """,
+                (courseId,)
+            )
+
+            return {"state": "success", "section_id": sectionId}
+
+    def put(self):
+        data = request.get_json() or request.form
+        userId = data['userId']
+        courseId = data['courseId']
+        topicId = data['topicId']
+        sectionId = data['sectionId']
+        sectionTitle = data['sectionTitle']
+        entityType = data['entityType']
+        entityId = data['entityId']
+
+        db.modify(
+            """
+            update Section set title=%s, entity_type=%s, entity_id=%s where section_id=%s;
+            """,
+            (sectionTitle, entityType, entityId, sectionId)
+        )
+
+        resp = {
+            "state": "success"
+        }
+
+        return resp
+
+    def delete(self):
+        sectionId = request.args.get('sectionId')
+
+        topicId = db.getOne(
+            """
+            select topic_id from Section where section_id=%s;
+            """,
+            (sectionId,)
+        )['section_id']
+        courseId = db.getOne(
+            """
+            select course_id from Topic where topic_id=%s;
+            """,
+            (topicId,)
+        )
+
+        db.delete(
+            """
+            delete from Section where section_id=%s;
+            """,
+            (sectionId,)
+        )
+        db.delete(
+            """
+            delete from Entity where section_id=%s;
+            """,
+            (sectionId,)
+        )
+        db.modify(
+            """
+            update Topic set section_count=section_count-1 where topic_id=%s;
+            """,
+            (topicId,)
+        )
+        db.modify(
+            """
+            update Course set section_count=section_count-1 where course_id=%s;
+            """,
+            (courseId,)
+        )
+
+        return {
+            "state": "success"
+        }
+
+class ImportStudent(Resource):
+    def post(self):
+        data = request.get_json() or request.form
+        if data['importType'] == 'batch':
+            # Batch Import
+
+        else:
+            # Single Import
+            courseId = data['courseId']
+            studentList = data['students']
+            studentCount = len(studentList)
+
+            for i in range(0, studentCount):
+                studentId = studentList[i]['id']
+                res = db.getOne(
+                    """
+                    select 1 from User where school_id=%s limit 1;
+                    """,
+                    (studentId,)
+                )
+                if res:
+                    db.query()
