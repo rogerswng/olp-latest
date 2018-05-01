@@ -4,6 +4,7 @@ from flask import request
 from flask.ext.restful import Resource
 from uuid import uuid4
 from app import db
+import json
 import snowflake.client
 
 # -*- API LIST -*-
@@ -19,6 +20,8 @@ import snowflake.client
 # POST /api/editSection {userId, courseId, topicId, sectionTitle, entityType, entityId}
 # PUT /api/editSection {userId, courseId, topicId, sectionTitle, entityType, entityId}
 # DELETE /api/editSection {sectionId}
+# POST /api/importStudent {importType, courseId, students{id:school_id}}
+# GET /api/sectionList {userId, courseId}
 
 def get_id():
     return snowflake.client.get_guid()
@@ -459,7 +462,9 @@ class ImportStudent(Resource):
         data = request.get_json() or request.form
         if data['importType'] == 'batch':
             # Batch Import
-
+            return {
+                "reason": "Not Supported Temporarily..."
+            }
         else:
             # Single Import
             courseId = data['courseId']
@@ -468,11 +473,57 @@ class ImportStudent(Resource):
 
             for i in range(0, studentCount):
                 studentId = studentList[i]['id']
-                res = db.getOne(
+                res = db.query(
                     """
                     select 1 from User where school_id=%s limit 1;
                     """,
                     (studentId,)
                 )
                 if res:
-                    db.query()
+                    isIn = db.query(
+                        """
+                        select 1 from StudentCourse where student_id=%s and course_id=%s;
+                        """,
+                        (studentId, courseId)
+                    )
+                    if isIn:
+                        studentList[i]['state'] = False
+                        studentList[i]['reason'] = 'Already Involved.'
+                    else:
+                        db.insert(
+                            """
+                            insert into studentCourse (student_id, course_id, status)
+                            values
+                            (%s, %s, %s);
+                            """,
+                            (studentId, courseId, 0)
+                        )
+                        studentList[i]['state'] = True
+                else:
+                    studentList[i]['state'] = False
+                    studentList[i]['reason'] = 'User not Found.'
+
+            resp = {
+                "state": "success",
+                "students": studentList
+            }
+
+            return resp
+
+class SectionList(Resource):
+    # Get Section List in Course Detail Page
+    def get(self):
+        userId = request.args.get("userId")
+        courseId = request.args.get("courseId")
+
+        processDetail = json.loads(db.getOne(
+            """
+            select process_detail from StudentCourse where student_id=%s and course_id=%s;
+            """,
+            (userId, courseId)
+        )['process_detail'])
+
+        return {
+            "state": "success",
+            "processDetail": processDetail
+        }

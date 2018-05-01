@@ -53,7 +53,7 @@ topicSql = """
         `topic_id` bigint unsigned not null,
         `title` text not null,
         `course_id` bigint unsigned not null,
-        `section_count` int unsigned, 
+        `section_count` int unsigned,
         primary key (`topic_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -89,6 +89,7 @@ studentCourseSql = """
         `course_id` bigint unsigned not null,
         `status` int unsigned not null,
         `last_section_id` bigint unsigned,
+        `process_detail` longtext, 
         primary key (`student_id`)
     )engine=InnoDB default charset=utf8;
 """
