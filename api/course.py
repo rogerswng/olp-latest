@@ -4,6 +4,7 @@ from flask import request
 from flask.ext.restful import Resource
 from uuid import uuid4
 from app import db
+import snowflake.client
 
 # tableCourse = {}
 # # courseId: {courseTitle, courseDescription, teacherId}
@@ -14,10 +15,18 @@ from app import db
 # tableTopicCourse = {}
 # # courseId: List<topicId>, topicId: {courseId, topicTitle}
 
+def get_id():
+    return snowflake.client.get_guid()
 
 class CreateCourse(Resource):
     # 新建课程
     def post(self):
+        """
+            POST /api/createCourse
+        """
+
+        # Deal with request.data
+
         data = request.get_json() or request.form
         userId = data['userId']
         courseTitle = data['courseTitle']
@@ -25,29 +34,49 @@ class CreateCourse(Resource):
         topicCount = data['topics']['count']
         topics = data['topics']['details']
 
-        courseId = str(uuid4())
+        # Generate course_id
+        courseId = get_id()
+        respData = {}
 
-        if userId in tableCourseTeacher :
-            tableCourseTeacher[userId].append(courseId)
-        else :
-            tableCourseTeacher[userId] = [courseId, ]
 
-        tableCourse[courseId] = {
-            'courseTitle': courseTitle,
-            'courseDescription': courseDescription,
-            'teacherId': userId
-        }
-        tableTopicCourse[courseId] = []
-        for i in range(0, topicCount):
-            topicId = str(uuid4())
-            tableTopicCourse[courseId].append(topicId)
-            tableTopicCourse[topicId] = {
-                'courseId': courseId,
-                'topicTitle': topics[i]['topicTitle']
-            }
+        # SQL Statements
+        db.insertOne(
+            """
+            insert into Course (course_id, title, description, teacher_id, is_valid)
+            values
+            (%s, %s, %s, %s, %s);
+            """,
+            (courseId, courseTitle, courseDescription, userId, 0)
+        )
+        res = db.getOne(
+            """
+            select course_count from User where user_id=%s;
+            """,
+            (userId,)
+        )
+        if res:
+            courseCount = res['course_count']+1
+            db.modify(
+                """
+                update User set course_count=%s where user_id=%s;
+                """,
+                (courseCount, userId)
+            )
+
+        if topicCount > 0:
+            db.insertOne(
+                """
+                insert into Topic (topic_id, title, course_id)
+                values
+                (%s, %s, %s);
+                """,
+                (get_id(), topics[0]['topicTitle'], courseId)
+            )
+
         respData = {
-            "courseId": courseId,
-            "courseDetail": tableCourse[courseId]
+            "status": "success",
+            "course_id": courseId,
+            "location": "/courseList"
         }
         return respData
 
@@ -58,26 +87,46 @@ class TeacherCourseList(Resource):
         userId = request.args.get("userId")
         character = request.args.get("character")
 
-        respData = {}
-        courseList = tableCourseTeacher[userId]
+        # Query Statements
+        res = db.getOne(
+            """
+            select course_count from User where user_id=%s;
+            """,
+            (userId,)
+        )['course_count']
+        if res:
+            if res <= 5:
+                page = 0
+                courseRes = db.getAll(
+                    """
+                    select * from Course where teacher_id=%s;
+                    """,
+                    (userId,)
+                )
+                courseCount = res
+            else:
+                page = res/5+1 if res%5 else res/5
+                courseRes = db.getSome(
+                    """
+                    select * from Course where teacher_id=%s;
+                    """,
+                    5, (userId,)
+                )
+                courseCount = 5
+
         courseDetail = []
-        courseCount = len(courseList)
         for i in range(0, courseCount):
-            courseId = courseList[i]
-            topicIdList = tableTopicCourse[courseId]
-            topicList = list(map(lambda x: tableTopicCourse[x]['topicTitle'], topicIdList))
-            cd = {
-                "title": tableCourse[courseId]['courseTitle'],
-                "count": len(tableTopicCourse[courseId]),
-                "topicList": topicList
-            }
-            courseDetail.append(cd)
+            courseDetail.append({
+                "title": courseRes[i]['title'],
+                "count": [courseRes[i]['topic_count'], courseRes[i]['section_count'], courseRes[i]['practice_count'], courseRes[i]['student_count']]
+            })
 
         respData = {
+            "state": "success",
             "count": courseCount,
+            "page": page,
             "courses": courseDetail
         }
-
         return respData
 
 class StudentCourseList(Resource):
@@ -86,25 +135,167 @@ class StudentCourseList(Resource):
         userId = request.args.get("userId")
         character = request.args.get("character")
 
-        respData = {}
-        courseList = tableCourseTeacher[userId]
+        # Query Statements
+        res = db.getOne(
+            """
+            select course_count from User where user_id=%s;
+            """,
+            (userId,)
+        )['course_count']
+
+        if res:
+            if res <= 5:
+                page = 0
+                # courseRes = db.getAll(
+                #     """
+                #     select * from Course where course_id in (
+                #         select course_id from StudentCourse where student_id=%s
+                #     );
+                #     """,
+                #     (userId,)
+                # )
+                # User JOIN instead of Sub-query --> faster
+                courseRes = db.getAll(
+                    """
+                    select a.* from Course a inner join StudentCourse b
+                    on a.course_id=b.course_id
+                    where b.student_id=%s;
+                    """,
+                    (userId,)
+                )
+                courseCount = res
+            else:
+                page = res/5+1 if res%5 else res/5
+                courseRes = db.getSome(
+                    """
+                    select a.*, b.status, b.last_section_id from Course a inner join StudentCourse b
+                    on a.course_id=b.course_id
+                    where b.student_id=%s;
+                    """,
+                    5, (userId,)
+                )
+                courseCount = 5
+
         courseDetail = []
-        courseCount = len(courseList)
-        for i in range(0, courseCount) :
-            courseId = courseList[i]
-            courseTitle = tableCourse[courseId]['courseTitle']
-            courseDescription = tableCourse[courseId]['courseDescription']
-            teacherId = tableCourse[courseId]['teacherId']
-            cd = {
-                "title": courseTitle,
-                "description": courseDescription,
-                "id": courseId,
-                "teacher": teacherId
-            }
-            courseDetail.append(cd)
+        for i in range(0, courseCount):
+            courseId = course[i]['course_id']
+            teacherId = course[i]['teacher_id']
+            teacherRes = db.getOne(
+                """
+                select name, icon from User where user_id=%s;
+                """,
+                (teacherId,)
+            )
+            if courseRes[i]['section_id'] != '':
+                sectionTitle = db.getOne(
+                    """
+                    select title from Section where section_id=%s;
+                    """,
+                    (courseRes[i]['section_id'],)
+                )
+            else:
+                sectionTitle = ''
+
+            courseDetail.append({
+                "title": courseRes[i]['title'],
+                "description": courseRes[i]['description'],
+                "id": courseRes[i]['course_id'],
+                "teacher": {
+                    "icon": teacherRes['icon']
+                    "name": teacherRes['name']
+                },
+                "last": {
+                    "title": sectionTitle,
+                    "id": courseRes[i]['section_id']
+                }
+            })
 
         respData = {
+            "state": "success",
             "count": courseCount,
+            "page": page,
             "courses": courseDetail
         }
         return respData
+
+class EditTopic(object):
+    # 编辑章节
+    def post(self):
+        data = request.get_json() or request.form
+        courseId = data['courseId']
+        title = data['topicTitle']
+
+        # Generate ID
+        topicId = get_id()
+
+        res = db.insertOne(
+            """
+            insert into Topic (topic_id, title, course_id, section_count)
+            values
+            (%s, %s, %s, %s);
+            """,
+            (topicId, title, courseId, 0)
+        )
+        if res:
+            db.modify(
+                """
+                update Course set course_count=course_count+1 where course_id=%s;
+                """,
+                (courseId,)
+            )
+            return {
+                "state": "success",
+                "topicId": topicId,
+                "title": title
+            }
+
+    def put(self):
+        data = request.get_json() or request.form
+        topicId = data['topicId']
+        title = data['topicTitle']
+
+        res = db.modify(
+            """
+            update Topic set title=%s where topic_id=%s;
+            """,
+            (title, topicId)
+        )
+
+        if res:
+            return {"state": "success", "topicId": topicId, "title": title}
+
+    def delete(self):
+        topicId = request.args.get("topicId")
+
+        res = db.delete(
+            """
+            delete from Topic where topic_id=%s;
+            """,
+            (topicId,)
+        )
+
+        if res:
+            sectionIds = db.getAll(
+                """
+                select section_id from Section where topic_id=%s;
+                """,
+                (topicId,)
+            )
+            cnt = len(sectionIds)
+            db.delete(
+                """
+                delete from Section where topic_id=%s;
+                """,
+                (topicId,)
+            )
+            for i in range(0, cnt):
+                db.delete(
+                    """
+                    delete from Entity where section_id=%s;
+                    """,
+                    (sectionIds[i]['section_id'],)
+                )
+
+            return {
+                "state": "success"
+            }

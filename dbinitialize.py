@@ -23,6 +23,10 @@ userSql = """
         `school_id` bigint unsigned not null,
         `password` varchar(20) not null,
         `character` int unsigned not null,
+        `course_count` int unsigned,
+        `practice_count` int unsigned,
+        `icon` text,
+        `name` text,
         primary key (`user_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -35,6 +39,11 @@ courseSql = """
         `title` text not null,
         `description` text not null,
         `teacher_id` bigint unsigned not null,
+        `topic_count` int unsigned,
+        `section_count` int unsigned,
+        `practice_count` int unsigned,
+        `student_count` int unsigned,
+        `is_valid` int unsigned not null,
         primary key (`course_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -44,6 +53,7 @@ topicSql = """
         `topic_id` bigint unsigned not null,
         `title` text not null,
         `course_id` bigint unsigned not null,
+        `section_count` int unsigned, 
         primary key (`topic_id`)
     )engine=InnoDB default charset=utf8;
 """

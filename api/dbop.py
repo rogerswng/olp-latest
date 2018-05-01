@@ -50,7 +50,6 @@ class Mysql(object):
                 host=dbConfig.DBHOST,
                 port=dbConfig.DBPORT,
                 user=dbConfig.DBUSER,
-                passwd=dbConfig.DBPSWD,
                 db=dbConfig.DBNAME,
                 charset=dbConfig.DBCHARSET,
                 cursorclass=DictCursor
@@ -61,6 +60,16 @@ class Mysql(object):
         self._cursor.execute("select @@IDENTITY as id")
         result = self._cursor.fetchall()
         return result[0]['id']
+
+    def query(self, sql, params=None):
+        """
+            @Summary: 封装 pymysql.execute()
+        """
+        if params is None:
+            return self._cursor.execute(sql)
+        else:
+            return self._cursor.execute(sql, params)
+
 
     def getAll(self, sql, params=None):
         """
