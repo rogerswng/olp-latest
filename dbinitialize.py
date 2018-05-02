@@ -89,7 +89,7 @@ studentCourseSql = """
         `course_id` bigint unsigned not null,
         `status` int unsigned not null,
         `last_section_id` bigint unsigned,
-        `process_detail` longtext, 
+        `process_detail` longtext,
         primary key (`student_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -99,12 +99,14 @@ practiceSql = """
         `practice_id` bigint unsigned not null,
         `title` text not null,
         `teacher_id` bigint unsigned not null,
+        `relation` int unsigned,
         `topic_id` bigint unsigned,
         `section_id` bigint unsigned,
         `course_id` bigint unsigned,
         primary key (`practice_id`)
     )engine=InnoDB default charset=utf8;
 """
+# relation 0-course, 1-topic, 2-section
 
 problemSql = """
     create table if not exists `Problem` (

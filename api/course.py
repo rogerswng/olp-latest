@@ -492,11 +492,17 @@ class ImportStudent(Resource):
                     else:
                         db.insert(
                             """
-                            insert into studentCourse (student_id, course_id, status)
+                            insert into StudentCourse (student_id, course_id, status)
                             values
                             (%s, %s, %s);
                             """,
                             (studentId, courseId, 0)
+                        )
+                        db.modify(
+                            """
+                            update User set course_count=course_count+1 where school_id=%s;
+                            """,
+                            (studentId,)
                         )
                         studentList[i]['state'] = True
                 else:
