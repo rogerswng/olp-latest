@@ -132,6 +132,7 @@ studentPracticeSql = """
         primary key (`student_id`)
     )engine=InnoDB default charset=utf8;
 """
+# status 0-new 1-draft 2-finished
 
 class DbInitilization(object):
     """
