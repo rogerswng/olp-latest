@@ -5,10 +5,13 @@ import App from './App';
 import router from './router';
 import iView from 'iview';
 import 'iview/dist/styles/iview.css';
+import cookieop from './utils/cookieop'
 
 Vue.use(iView);
+Vue.use(cookieop);
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
+
 
 /* eslint-disable no-new */
 new Vue({

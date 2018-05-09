@@ -45,6 +45,12 @@
           alert("请输入正确的学/工号！");
           return;
         }
+        // Request Login API and Callback
+        // Callback with Cookie operation, a test cookie is set as following
+        var expiredays = 1000*60*60;
+        this.$setCookie('username', username, expiredays);
+        this.$setCookie('uid', 123456, expiredays);
+        alert(this.$getCookie('username')+" "+this.$getCookie('uid'));
       }
     }
   }
