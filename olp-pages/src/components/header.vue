@@ -11,6 +11,8 @@
         <div class="username">
           <p>{{ username }}</p>
         </div>
+        <div class="float-clear">
+        </div>
       </div>
       <div class="float-clear">
       </div>
@@ -36,6 +38,7 @@
   border-bottom: 1px solid #dddee1;
 }
 .header {
+  position: relative;
   width: 1175px;
   margin: 0 auto;
   padding: 10px 0;
@@ -54,16 +57,27 @@
 }
 .userInfo {
   float: right;
+  /* position: relative; */
   display: inline-block;
   vertical-align: middle;
 
 }
 .avatar {
   display: inline-block;
+  padding-right: 75px;
+  /* float:left; */
 }
 .username {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-10px);
   display: inline-block;
   margin-left: 0.5rem;
+  /* position: absolute; */
+  /* float: left; */
+  /* padding-left: 0.5rem; */
+  /* top: 50%; */
 }
 .float-clear {
   clear: both;

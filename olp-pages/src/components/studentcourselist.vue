@@ -9,16 +9,11 @@
           <p>本课程主要向大家介绍 Android 应用开发工程师的职业背景、行业前景、团队中的定位及所需的技能，同时分享 Android 应用开发的学习方法和路径以及将来的职业规划</p>
         </div>
         <div class="course-info">
-          <div class="teacher-info">
-            <div class="avatar">
-              <Avatar icon="person" size="small" />
-            </div>
-            <div class="teacher-name">
-              <p>老师 A</p>
-            </div>
+          <div class="courselist-teacher-info">
+            <SmallTeacherInfo />
           </div>
           <div class="last-progress">
-            <p>上次学到&nbsp;&nbsp;&nbsp;<span class="last-progress-section">Android 应用开发工程师职业规划</span></p>
+            <p>上次学到   <span class="last-progress-section">Android 应用开发工程师职业规划</span></p>
           </div>
           <div class="float-clear">
           </div>
@@ -32,12 +27,17 @@
 </template>
 
 <script>
+import SmallTeacherInfo from './smallteacherinfo';
+
 export default {
   name: 'StudentCourseList',
   data () {
     return {
 
     }
+  },
+  components: {
+    'SmallTeacherInfo': SmallTeacherInfo
   }
 }
 </script>
@@ -85,23 +85,19 @@ hr {
   text-align: left;
 }
 
-.teacher-info {
+.courselist-teacher-info {
   float: left;
-}
-.teacher-name {
+  width: 200px;
   display: inline-block;
-  padding: 0 5px;
-}
-.teacher-info>p {
-  color: #80848f;
-  text-align: left;
 }
 
 .last-progress {
   float: right;
+  padding: 3px 0;
 }
 .last-progress>p {
   text-align: right;
+  white-space: pre-wrap;
 }
 .last-progress-section {
   color: #2d8cf0;
