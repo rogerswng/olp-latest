@@ -2,7 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '../components/HelloWorld'
 import Login from '../pages/login'
-import Main from '../pages/main'
+import StudentMain from '../pages/studentmain'
+import StudentCourseList from '../components/studentcourselist'
+import StudentPracticeList from  '../components/studentpracticelist'
 
 Vue.use(Router)
 
@@ -19,9 +21,25 @@ export default new Router({
       component: Login
     },
     {
-      path: '/main',
-      name: 'Main',
-      component: Main
+      path: '/studentmain',
+      name: 'StudentMain',
+      component: StudentMain,
+      children: [
+        {
+          path:'',
+          component: StudentCourseList
+        },
+        {
+          path: 'course',
+          name: 'StudentCourse',
+          component: StudentCourseList
+        },
+        {
+          path: 'practice',
+          name: 'StudentPractice',
+          component: StudentPracticeList
+        }
+      ]
     }
   ]
 })

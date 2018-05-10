@@ -1,17 +1,19 @@
 <template>
-  <div class="header">
-    <div class="header-label">
-      <p>Online Learning</p>
-    </div>
-    <div class="userInfo">
-      <div class="avatar">
-        <Avatar icon="person" size="large" />
+  <div class="header-wrap">
+    <div class="header">
+      <div class="header-label">
+        <p>Online Learning</p>
       </div>
-      <div class="username">
-        <p>{{ username }}</p>
+      <div class="userInfo">
+        <div class="avatar">
+          <Avatar icon="person" size="large" />
+        </div>
+        <div class="username">
+          <p>{{ username }}</p>
+        </div>
       </div>
-    </div>
-    <div class="float-clear">
+      <div class="float-clear">
+      </div>
     </div>
   </div>
 </template>
@@ -28,18 +30,21 @@
 </script>
 
 <style>
-.header {
+.header-wrap {
   width: 100%;
-  padding: 10px 25px;
-  border-bottom: 1px solid #dddee1;
   background-color: #ffffff;
+  border-bottom: 1px solid #dddee1;
+}
+.header {
+  width: 1175px;
+  margin: 0 auto;
+  padding: 10px 0;
 }
 .header-label {
   float: left;
   display: inline-block;
   vertical-align: middle;
   padding: 5px 0;
-  /* line-height: inherit; */
 }
 .header-label>p {
   font-size: 1.5rem;
