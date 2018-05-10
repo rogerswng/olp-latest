@@ -1,12 +1,16 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import HelloWorld from '../components/HelloWorld'
-import Login from '../pages/login'
-import StudentMain from '../pages/studentmain'
-import StudentCourseList from '../components/studentcourselist'
-import StudentPracticeList from  '../components/studentpracticelist'
+import Vue from 'vue';
+import Router from 'vue-router';
+import HelloWorld from '../components/HelloWorld';
+// Pages
+import Login from '../pages/login';
+import StudentMain from '../pages/studentmain';
+import Practice from '../pages/practice';
+// Components
+import StudentCourseList from '../components/studentcourselist';
+import StudentPracticeList from  '../components/studentpracticelist';
 
-Vue.use(Router)
+
+Vue.use(Router);
 
 export default new Router({
   routes: [
@@ -40,6 +44,11 @@ export default new Router({
           component: StudentPracticeList
         }
       ]
+    },
+    {
+      path:'/practice/:id',
+      name: 'Practice',
+      component: Practice
     }
   ]
 })
