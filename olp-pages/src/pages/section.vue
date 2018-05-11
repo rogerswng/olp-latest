@@ -44,6 +44,7 @@ export default {
 .section-content {
   width: 1175px;
   margin: 0 auto;
+  padding: 10px 0;
 }
 .videoplayer-wrap {
   width: 1175px;

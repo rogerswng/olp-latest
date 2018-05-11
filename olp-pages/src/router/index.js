@@ -8,6 +8,7 @@ import StudentMain from '../pages/studentmain';
 import Practice from '../pages/practice';
 import Course from '../pages/course';
 import Section from '../pages/section';
+import PracticeDetail from '../pages/practicedetail';
 
 // Components
 import StudentCourseList from '../components/studentcourselist';
@@ -63,6 +64,11 @@ export default new Router({
       path: '/section/:id',
       name: 'Section',
       component: Section
+    },
+    {
+      path: '/practice/:id/detail',
+      name: 'PracticeDetail',
+      component: PracticeDetail
     }
   ]
 })
