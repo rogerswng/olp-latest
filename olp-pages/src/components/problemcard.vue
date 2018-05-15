@@ -29,7 +29,8 @@ export default {
       var pid = e.path[1].attributes["id"].value;
       var ele = document.getElementById(pid);
       var className = ele.attributes["class"].value;
-      
+      if (className.indexOf('problemcard-cur')) {
+      }
     }
   }
 }
@@ -70,5 +71,13 @@ export default {
 .problemcard-no {
   background-color: #fff;
   color: #2d8cf0;
+}
+.problemcard-correct {
+  background-color: #19be6b;
+  color: #fff;
+}
+.problemcard-false {
+  background-color: #ed3f14;
+  color: #fff;
 }
 </style>

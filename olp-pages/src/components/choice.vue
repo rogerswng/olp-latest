@@ -68,4 +68,12 @@ export default {
   border: 1px solid #2d8cf0;
   color: #2d8cf0;
 }
+.choice-content-correct {
+  border: 1px solid #19be6b;
+  color: #19be6b;
+}
+.choice-content-false {
+  border: 1px solid #ed3f14;
+  color: #ed3f14;
+}
 </style>

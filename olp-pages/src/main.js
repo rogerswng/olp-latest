@@ -4,13 +4,18 @@ import Vue from 'vue';
 import App from './App';
 import router from './router';
 import iView from 'iview';
+// import editormd from 'editor.md'
 import 'iview/dist/styles/iview.css';
 import cookieop from './utils/cookieop'
 
 Vue.use(iView);
 Vue.use(cookieop);
+// Vue.use(editormd);
 
 Vue.config.productionTip = false;
+
+// Hub = new Vue();
+// Event Hub
 
 
 /* eslint-disable no-new */

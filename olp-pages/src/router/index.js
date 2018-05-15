@@ -9,10 +9,17 @@ import Practice from '../pages/practice';
 import Course from '../pages/course';
 import Section from '../pages/section';
 import PracticeDetail from '../pages/practicedetail';
+import TeacherMain from '../pages/teachermain';
 
 // Components
 import StudentCourseList from '../components/studentcourselist';
 import StudentPracticeList from  '../components/studentpracticelist';
+import TeacherCourseList from '../components/teachercourselist';
+import TeacherPracticeList from '../components/teacherpracticelist';
+import TeacherCourseCreate from '../components/teachercoursecreate';
+import TeacherPracticeCreate from '../components/teacherpracticecreate';
+import TeacherCourseEdit from '../components/teachercourseedit';
+import EditSection from '../components/editsection';
 
 
 Vue.use(Router);
@@ -36,6 +43,7 @@ export default new Router({
       children: [
         {
           path:'',
+          name: 'StudentCourse',
           component: StudentCourseList
         },
         {
@@ -69,6 +77,48 @@ export default new Router({
       path: '/practice/:id/detail',
       name: 'PracticeDetail',
       component: PracticeDetail
+    },
+    {
+      path: '/teachermain',
+      name: 'TeacherMain',
+      component: TeacherMain,
+      children: [
+        {
+          path: '',
+          name: 'TeacherCourseList',
+          component: TeacherCourseList
+        },
+        {
+          path: 'course',
+          name: 'TeacherCourseList',
+          component: TeacherCourseList
+        },
+        {
+          path: 'courseCreate',
+          name: 'TeacherCourseCreate',
+          component: TeacherCourseCreate
+        },
+        {
+          path: 'practiceCreate',
+          name: 'TeacherPracticeCreate',
+          component: TeacherPracticeCreate
+        },
+        {
+          path: 'practice',
+          name: 'TeacherPracticeList',
+          component: TeacherPracticeList
+        },
+        {
+          path: 'courseEdit/:id',
+          name: 'TeacherCourseEdit',
+          component: TeacherCourseEdit
+        },
+        {
+          path: 'sectionEdit/:id',
+          name: 'TeacherSectionEdit',
+          component: EditSection
+        }
+      ]
     }
   ]
 })
