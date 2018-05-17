@@ -24,12 +24,28 @@ import EditSection from '../components/editsection';
 
 Vue.use(Router);
 
+var cookieop = require('../utils/cookieop');
+
 export default new Router({
+  mode: 'history', 
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      redirect: function (to) {
+        var username = cookieop.methods.getCookie("username");
+        var character = cookieop.methods.getCookie("character");
+        // console.log(username);
+        // console.log(character);
+        if (username === null) {
+          return '/login';
+        } else if (parseInt(character) === 0) {
+          // Student
+          return '/studentmain';
+        } else if (parseInt(character) === 1) {
+          // Teacher
+          return '/teachermain';
+        }
+      }
     },
     {
       path: '/login',

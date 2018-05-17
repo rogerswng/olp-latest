@@ -27,7 +27,7 @@ export default {
   },
   mounted () {
     this.active = this.$route.name;
-  }, 
+  },
   watch: {
     '$route' (cur) {
       this.active = cur.name;

@@ -62,7 +62,7 @@ export default {
       that.id = sectionTemp.id;
       that.sectionTitle = sectionTemp.sectionTitle;
     })
-  }, 
+  },
   components: {
     'mavon-editor': mavonEditor.mavonEditor
   },

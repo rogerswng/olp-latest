@@ -9,7 +9,7 @@
         <p>课程目录</p>
       </div>
       <div class="control-section-list-wrap">
-        <CourseOutlineSmall />
+        <CourseOutlineSmall :relatedcourse="this.relatedcourse" />
       </div>
     </div>
     <div class="float-clear">
@@ -25,7 +25,15 @@ export default {
   name: 'VideoPlayer',
   data () {
     return {
+      videoId: '12376345',
+      vlength: 1126,
+      url: '/static/test400k.mp4'
     }
+  },
+  props: ['videoid', 'relatedcourse'],
+  created () {
+    console.log(this.videoid);
+    console.log(this.relatedcourse);
   },
   mounted () {
     var player = document.getElementById('videoElement');

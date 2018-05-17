@@ -41,7 +41,7 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style scoped lang="css">
 .practice-main {
   height: 100%;
   background-color: #f8f8f9;

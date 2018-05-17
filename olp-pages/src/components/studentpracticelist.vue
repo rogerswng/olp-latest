@@ -1,7 +1,10 @@
 <template lang="html">
   <div class="list-wrap student-practice-list">
     <div class="student-practice-item">
-      <div class="student-practice-item-content item-first">
+      <div style="padding: 10px;">
+
+      </div>
+      <div class="student-practice-item-content">
         <div class="practice-title">
           <p>课后练习</p>
         </div>

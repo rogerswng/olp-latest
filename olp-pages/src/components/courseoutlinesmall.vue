@@ -1,42 +1,31 @@
 <template lang="html">
   <div class="courseoutlinesmall-list">
-    <div class="courseoutlinesmall-item courseoutlinesmall-item-mid">
+    <div class="courseoutlinesmall-item courseoutlinesmall-item-mid" v-for="(section, index) in sections">
       <div class="courseoutlinesmall-item-section-info">
-        <div class="courseoutlinesmall-item-section-number section-number-off">
-          <p>1</p>
+        <div class="courseoutlinesmall-item-section-number section-number-off" v-if="section.status === 0">
+          <p>{{ index+1 }}</p>
+        </div>
+        <div class="courseoutlinesmall-item-section-number section-number-learning" v-if="section.status === 1">
+          <p>{{ index+1 }}</p>
+        </div>
+        <div class="courseoutlinesmall-item-section-number section-number-finish" v-if="section.status === 2">
+          <p>{{ index+1 }}</p>
         </div>
         <div class="courseoutlinesmall-item-section-title">
-          <p>Java 基础 1</p>
+          <p><router-link :to="{ name: 'Section', params: {id: section.id} }">{{ section.title }}</router-link></p>
         </div>
-        <div class="courseoutlinesmall-item-section-other">
-          <p>18:30</p>
+        <div class="courseoutlinesmall-item-section-other" v-if="section.entity.type === 'video'">
+          <p>{{ parseDuration(section.entity.length) }}</p>
+        </div>
+        <div class="courseoutlinesmall-item-section-other" v-else-if="section.entity.type === 'doc'">
+          <p>{{ 讲义 }}</p>
         </div>
         <div class="float-clear">
         </div>
       </div>
       <div class="courseoutlinesmall-item-section-description">
         <div class="courseoutlinesmall-item-section-description-wrap">
-          <p>本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况</p>
-        </div>
-      </div>
-    </div>
-    <div class="courseoutlinesmall-item courseoutlinesmall-item-mid">
-      <div class="courseoutlinesmall-item-section-info">
-        <div class="courseoutlinesmall-item-section-number section-number-on">
-          <p>2</p>
-        </div>
-        <div class="courseoutlinesmall-item-section-title">
-          <p>Java 基础 2</p>
-        </div>
-        <div class="courseoutlinesmall-item-section-other">
-          <p>18:30</p>
-        </div>
-        <div class="float-clear">
-        </div>
-      </div>
-      <div class="courseoutlinesmall-item-section-description">
-        <div class="courseoutlinesmall-item-section-description-wrap">
-          <p>本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况</p>
+          <p>{{ section.desc }}</p>
         </div>
       </div>
     </div>
@@ -48,13 +37,46 @@ export default {
   name: 'CourseOutlineSmall',
   data () {
     return {
-
+      sections: [
+        {
+          id: '123456787654',
+          title: 'Java 基础 1',
+          desc: '本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况',
+          entity: {
+            type: 'video',
+            length: 1182
+          },
+          status: 0
+        }
+      ]
+    }
+  },
+  props: ['relatedcourse'],
+  methods: {
+    parseDuration: function (dur) {
+      var min = parseInt(dur/60);
+      var sec = dur%60;
+      var smin, ssec;
+      if (min < 10) {
+        smin = '0'+min.toString();
+      } else {
+        smin = min.toString();
+      }
+      if (sec < 10) {
+        ssec = '0'+sec.toString();
+      } else {
+        ssec = sec.toString();
+      }
+      return smin+':'+ssec;
     }
   }
 }
 </script>
 
 <style lang="css">
+a, a:hover, a:visited, a:active {
+  color: inherit;
+}
 .courseoutlinesmall-list {
   width: 415px;
   height: 489px;

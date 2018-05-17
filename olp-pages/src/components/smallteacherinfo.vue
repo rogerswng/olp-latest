@@ -4,7 +4,7 @@
       <Avatar type="person" size="small" />
     </div>
     <div class="smallteacherinfo-name">
-      <p>老师 A</p>
+      <p>{{teacher}}</p>
     </div>
     <div class="float-clear">
     </div>
@@ -16,9 +16,11 @@ export default {
   name: 'SmallTeacherInfo',
   data () {
     return {
-
+      teacher: this.teachername
     }
-  }
+  },
+  // 父组件传 teachername 进来
+  props: ['teachername']
 }
 </script>
 

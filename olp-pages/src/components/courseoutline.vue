@@ -4,7 +4,43 @@
       <div class="courseoutline-label">
         <p>课时列表</p>
       </div>
-      <div class="courseoutline-topic">
+      <div class="courseoutline-topic" v-for="(course, index) in coursecontent">
+        <div class="courseoutline-topic-title">
+          <p>第 {{index+1}} 课 · {{course.topic}}</p>
+        </div>
+        <div class="courseoutline-section-list">
+          <div class="courseoutline-section-item" v-for="(section, i) in course.sections">
+            <div class="section-info">
+              <div class="section-number section-number-off" v-if="section.status === 0">
+                <p>{{ i+1 }}</p>
+              </div>
+              <div class="section-number section-number-learning" v-else-if="section.status === 1">
+                <p>{{ i+1 }}</p>
+              </div>
+              <div class="section-number section-number-finish" v-else-if="section.status === 2">
+                <p>{{ i+1 }}</p>
+              </div>
+              <div class="section-title">
+                <p style=""><router-link :to="{ name: 'Section', params: {id: section.id} }"><span>{{ section.title }}</span></router-link></p>
+              </div>
+              <div class="section-other video-time-wrap" v-if="section.entity.type === 'video'">
+                <p>{{ parseDuration(section.entity.duration) }}</p>
+              </div>
+              <div class="section-other video-time-wrap" v-else-if="section.entity.type === 'doc'">
+                <p>讲义</p>
+              </div>
+              <div class="float-clear">
+              </div>
+            </div>
+            <div class="section-description">
+              <p>{{ section.desc }}</p>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 10px;">
+        </div>
+      </div>
+      <!-- <div class="courseoutline-topic">
         <div class="courseoutline-topic-title">
           <p>第 1 课 · 初识 Java</p>
         </div>
@@ -64,7 +100,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -77,13 +113,35 @@ export default {
 
     }
   },
+  props: ['coursecontent'],
   created () {
     console.log(this.$route.params.id);
+  },
+  methods: {
+    parseDuration: function (dur) {
+      var min = parseInt(dur/60);
+      var sec = dur%60;
+      var smin, ssec;
+      if (min < 10) {
+        smin = '0'+min.toString();
+      } else {
+        smin = min.toString();
+      }
+      if (sec < 10) {
+        ssec = '0'+sec.toString();
+      } else {
+        ssec = sec.toString();
+      }
+      return smin+':'+ssec;
+    }
   }
 }
 </script>
 
 <style lang="css">
+a, a:hover, a:active, a:visited {
+  color: inherit;
+}
 .float-clear {
   clear: both;
 }

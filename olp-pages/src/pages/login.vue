@@ -18,6 +18,12 @@
 </template>
 
 <script>
+  /*
+  PAGE LOGIN
+  1. Check local cookie, have user-info?
+  2. if have, straight redirect to main
+  3. if not, login
+  */
   export default {
     name: 'Login',
     data () {
@@ -33,30 +39,36 @@
         var password = this.password;
 
         if (username === '') {
+          // check username is not empty
           alert("请输入学/工号！");
           return;
         }
         if (password === '') {
+          // check password is not empty
           alert("请输入密码！");
           return;
         }
         var usernameRe = /^[0-9]+.?[0-9]*/;
-        if(!usernameRe.test(username)) {
+        if(!usernameRe.test(username) || username.length != 10) {
+          // check username is 10-bit number
           alert("请输入正确的学/工号！");
           return;
         }
         // Request Login API and Callback
         // Callback with Cookie operation, a test cookie is set as following
-        var expiredays = 1000*60*60;
-        this.$setCookie('username', username, expiredays);
-        this.$setCookie('uid', 123456, expiredays);
-        alert(this.$getCookie('username')+" "+this.$getCookie('uid'));
+        // Construct POST Data
+        var d = {
+          username: username,
+          password: password
+        }
+        console.log(d);
+        // POST, and CALLBACK
       }
     }
   }
 </script>
 
-<style>
+<style scoped>
 .label {
   width: 300px;
   position: relative;

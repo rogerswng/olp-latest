@@ -1,10 +1,10 @@
 <template lang="html">
   <div class="courseinfo-main">
     <div class="courseinfo-title">
-      <p>Android 项目开发实战——4 个实战项目 7 天学会 Android 经典教程</p>
+      <p>{{title}}</p>
     </div>
     <div class="courseinfo-teacherinfo">
-      <SmallTeacherInfo />
+      <SmallTeacherInfo :teachername="teacher" />
     </div>
   </div>
 </template>
@@ -16,9 +16,11 @@ export default {
   name: 'CourseInfo',
   data () {
     return {
-
+      title: this.coursetitle,
+      teacher: this.teachername
     }
   },
+  props: ['coursetitle', 'teachername'],
   components: {
     'SmallTeacherInfo': SmallTeacherInfo
   }

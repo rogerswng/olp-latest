@@ -31,11 +31,12 @@
   }
 </script>
 
-<style>
+<style lang="css">
 .header-wrap {
   width: 100%;
   background-color: #ffffff;
   border-bottom: 1px solid #dddee1;
+  /* position: fixed; */
 }
 .header {
   position: relative;

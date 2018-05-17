@@ -30,7 +30,7 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style scoped lang="css">
 .main {
   background-color: #f8f8f9;
   height: 100%;
