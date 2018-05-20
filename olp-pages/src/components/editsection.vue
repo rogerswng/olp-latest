@@ -1,7 +1,12 @@
 <template lang="html">
   <div class="editsection-wrap">
     <div class="editsection-content" style="overflow-y: auto;">
-      <div style="padding-top: 15px;">
+      <!-- <div style="padding-top: 15px;">
+      </div> -->
+      <div class="editsection-label" style="text-align: left; padding: 15px 0;">
+        <p style="font-size: 1.5em; font-weight: bold;" v-if="this.type === 'create'">新建小节</p>
+        <p style="font-size: 1.5em; font-weight: bold;" v-else-if="this.type === 'edit'">编辑小节</p>
+        <!-- <p style="font-size: 1.2em; font-weight: bold; color: #80848f;"></p> -->
       </div>
       <div class="editsection-title" style="padding-bottom: 10px;">
         <p style="float: left; text-align: left; padding: 7px 10px 7px 0;">小节名</p>
@@ -11,7 +16,7 @@
       </div>
       <div class="editsection-entity-type" style="padding-bottom: 10px;">
         <p style="float:left; text-align:left; padding-right: 10px;">内容类型</p>
-        <RadioGroup v-model="entityType" style="float: left;" @on-change="handleChange">
+        <RadioGroup v-model="entity.entityType" style="float: left;" @on-change="handleChange">
           <Radio label="video">
             <span>视频</span>
           </Radio>
@@ -32,12 +37,12 @@
       </div>
       <div class="createsection-insert-doc" style="display: none; width: 790px;" id="editDoc">
         <!-- <mavon-editor style="height: 500px; width: 805px;" /> -->
-        <EditorMd :isView="docshow" style="z-index: 10000;"/>
+        <EditorMd :isView="docshow" :initData="entity.content" style="z-index: 10000;"/>
       </div>
       <div class="hr-wrap">
         <hr />
       </div>
-      <Button type="success" style="margin-bottom: 20px; float:right;">保存此节</Button>
+      <Button type="success" style="margin-bottom: 20px; float:right;" @click="handleSave">保存此节</Button>
     </div>
   </div>
 </template>
@@ -49,28 +54,55 @@ import EditorMd from './mdeditor';
 import Hub from '../assets/hub.js';
 
 export default {
-  name: 'EditSection',
+  name: 'TeacherSectionEdit',
   data () {
     return {
-      entityType: 'video',
-      id: '',
+      type: '',
+      entity: {
+        entityType: 'video',
+        url: ''
+      },
+      sectionid: '',
+      topicid: '',
+      courseid: '',
       sectionTitle: '',
       docshow: false
     }
-  },
-  created () {
-    var that = this;
-    Hub.$on('EditSection', function(sectionTemp) {
-      that.entityType = sectionTemp.entityType;
-      that.id = sectionTemp.id;
-      that.sectionTitle = sectionTemp.sectionTitle;
-    })
   },
   components: {
     'mavon-editor': mavonEditor.mavonEditor,
     'EditorMd': EditorMd
   },
   methods: {
+    initComp: function () {
+      if (this.$route.name.indexOf("TeacherSectionCreate") != -1) {
+        // Create Section
+        this.type = 'create';
+      } else if (this.$route.name.indexOf("TeacherSectionEdit") != -1) {
+        // Edit Section
+        this.type = 'edit';
+        this.sectionTitle = 'SectionTitle from remote server...';
+        this.sectionid = this.$route.params.sectionid;
+        this.topicid = this.$route.params.topicid;
+        this.courseid = this.$route.params.courseid;
+        // load data from remote server
+        // this.entity = {
+        //   entityType: 'doc',
+        //   content: 'asdjfhgausdyfgasdjhfbasdf'
+        // }
+        this.entity = {
+          entityType: 'video',
+          url: '1287436410283'
+        }
+        if (this.entity.entityType === 'doc') {
+          document.getElementById('editVideo').style.display = "none";
+          document.getElementById('editDoc').style.display = "block";
+          this.docshow = true;
+        } else if (this.entityType === 'video') {
+
+        }
+      }
+    },
     handleChange: function (cur) {
       if (cur === 'video') {
         document.getElementById('editDoc').style.display = "none";
@@ -80,7 +112,19 @@ export default {
         document.getElementById('editDoc').style.display = "block";
         this.docshow = true;
       }
+    },
+    handleSave: function () {
+      if (this.sectionTitle === '') {
+        alert("小节名不能为空");
+      } else if (this.entity.entityType === 'video' && this.entity.url === '') {
+        alert("请上传视频");
+      }
+      console.log("保存~");
     }
+  },
+  mounted () {
+    console.log(this.$route.name);
+    this.initComp();
   }
 }
 </script>

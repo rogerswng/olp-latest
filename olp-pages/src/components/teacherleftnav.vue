@@ -10,7 +10,7 @@
           <MenuItem name="TeacherCourseList">课程列表</MenuItem>
         </router-link>
         <router-link :to="{ name: 'TeacherCourseCreate' }">
-          <MenuItem name="TeacherCourseCreate">编辑课程</MenuItem>
+          <MenuItem name="TeacherCourseCreate">新建课程</MenuItem>
         </router-link>
       </Submenu>
       <Submenu name="TeacherPractice">
@@ -22,7 +22,7 @@
           <MenuItem name="TeacherPracticeList">练习列表</MenuItem>
         </router-link>
         <router-link :to="{ name: 'TeacherPracticeCreate' }">
-          <MenuItem name="TeacherPracticeCreate">编辑练习</MenuItem>
+          <MenuItem name="TeacherPracticeCreate">新建练习</MenuItem>
         </router-link>
       </Submenu>
     </Menu>

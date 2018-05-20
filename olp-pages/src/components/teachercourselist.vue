@@ -1,7 +1,32 @@
 <template lang="html">
   <div class="teachercourselist-wrap">
     <div class="teachercourselist-content">
-      <div class="teachercourselist-item teachercourselist-item-first">
+      <div style="padding: 5px 0;">
+      </div>
+      <div v-for="course in courses" class="teachercourselist-item-wrap">
+        <div class="teachercourselist-item">
+          <div class="teachercourselist-course-title">
+            <p><router-link :to="{ name: 'TeacherCourseEdit', params: {id: course.id}}"><span>{{course.title}}</span></router-link></p>
+          </div>
+          <div class="teachercourselist-course-info">
+            <p>{{course.info}}</p>
+          </div>
+          <div class="teachercourselist-course-info">
+            <p>{{course.students}} 学生参与课程</p>
+          </div>
+          <div class="teachercourselist-button-group">
+            <router-link :to="{ name: 'TeacherCourseEdit', params: {id: course.id} }"><Button type="primary">编辑课程</Button></router-link>
+            <Button type="primary" @click="handleImportStudent">导入学生</Button>
+            <Button type="error" @click="handleRemove">下线课程</Button>
+          </div>
+          <div class="float-clear">
+          </div>
+        </div>
+        <div class="hr-wrap">
+          <hr />
+        </div>
+      </div>
+      <!-- <div class="teachercourselist-item teachercourselist-item-first">
         <div class="teachercourselist-course-title">
           <p>Android 应用开发工程师职业规划</p>
         </div>
@@ -20,14 +45,34 @@
       </div>
       <div class="hr-wrap">
         <hr />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'TeacherCourseList'
+  name: 'TeacherCourseList',
+  data () {
+    return {
+      courses: [
+        {
+          id: '123t64192301',
+          title: 'Android 应用开发工程师职业规划',
+          info: '4 主题 / 23 小节 / 40 练习',
+          students: 32
+        }
+      ]
+    }
+  },
+  methods: {
+    handleImportStudent: function () {
+      console.log("handle import student");
+    },
+    handleRemove: function () {
+      console.log("handle remove");
+    }
+  }
 }
 </script>
 

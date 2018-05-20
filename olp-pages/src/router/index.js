@@ -17,9 +17,10 @@ import StudentPracticeList from  '../components/studentpracticelist';
 import TeacherCourseList from '../components/teachercourselist';
 import TeacherPracticeList from '../components/teacherpracticelist';
 import TeacherCourseCreate from '../components/teachercoursecreate';
-import TeacherPracticeCreate from '../components/teacherpracticecreate';
+import TeacherTopicEdit from '../components/teachertopicedit';
+import TeacherPracticeEdit from '../components/teacherpracticeedit';
 import TeacherCourseEdit from '../components/teachercourseedit';
-import EditSection from '../components/editsection';
+import TeacherSectionEdit from '../components/editsection';
 
 
 Vue.use(Router);
@@ -27,7 +28,7 @@ Vue.use(Router);
 var cookieop = require('../utils/cookieop');
 
 export default new Router({
-  mode: 'history', 
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -110,19 +111,29 @@ export default new Router({
           component: TeacherCourseList
         },
         {
+          path: 'practice',
+          name: 'TeacherPracticeList',
+          component: TeacherPracticeList
+        },
+        {
           path: 'courseCreate',
           name: 'TeacherCourseCreate',
-          component: TeacherCourseCreate
+          component: TeacherCourseEdit
+        },
+        {
+          path: 'topicCreate/:courseid',
+          name: 'TeacherTopicCreate',
+          component: TeacherTopicEdit
+        },
+        {
+          path: 'sectionCreate/:courseid/:topicid',
+          name: 'TeacherSectionCreate',
+          component: TeacherSectionEdit
         },
         {
           path: 'practiceCreate',
           name: 'TeacherPracticeCreate',
-          component: TeacherPracticeCreate
-        },
-        {
-          path: 'practice',
-          name: 'TeacherPracticeList',
-          component: TeacherPracticeList
+          component: TeacherPracticeEdit
         },
         {
           path: 'courseEdit/:id',
@@ -130,9 +141,19 @@ export default new Router({
           component: TeacherCourseEdit
         },
         {
-          path: 'sectionEdit/:id',
+          path: 'topicEdit/:courseid/:topicid',
+          name: 'TeacherTopicEdit',
+          component: TeacherTopicEdit
+        },
+        {
+          path: 'sectionEdit/:courseid/:topicid/:sectionid',
           name: 'TeacherSectionEdit',
-          component: EditSection
+          component: TeacherSectionEdit
+        },
+        {
+          path: 'practiceEdit/:practiceid',
+          name: 'TeacherPracticeEdit',
+          component: TeacherPracticeEdit
         }
       ]
     }
