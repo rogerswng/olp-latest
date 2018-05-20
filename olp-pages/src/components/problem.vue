@@ -1,23 +1,17 @@
 <template lang="html">
   <div class="problem-wrap">
     <div class="problem-content">
-      <p>在 C++ 中使用流进行输入输出，其中用于屏幕输出的对象是（  ）</p>
+      <p>{{ p.content }}</p>
     </div>
     <div class="problem-choices-wrap">
-      <Choice choiceid="1" choiceclass="choice-content" @choiceselected="listenToSelected" />
+      <template v-for="(ch, index) in p.choices">
+        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" />
+      </template>
+      <!-- <Choice v-for="(ch, index) in p.choices" :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" /> -->
+      <!-- <Choice choiceid="1" choiceclass="choice-content" @choiceselected="listenToSelected" />
       <Choice choiceid="2" choiceclass="choice-content" @choiceselected="listenToSelected" />
       <Choice choiceid="3" choiceclass="choice-content" @choiceselected="listenToSelected" />
-      <Choice choiceid="4" choiceclass="choice-content" @choiceselected="listenToSelected" />
-    </div>
-    <div class="problem-op-wrap">
-      <div class="problem-button-wrap">
-        <Button type="error" size="large">交卷</Button>
-      </div>
-      <div class="problem-button-wrap">
-        <Button type="primary" size="large">下一题</Button>
-      </div>
-      <div class="float-clear">
-      </div>
+      <Choice choiceid="4" choiceclass="choice-content" @choiceselected="listenToSelected" /> -->
     </div>
   </div>
 </template>
@@ -27,6 +21,7 @@ import Choice from './choice';
 
 export default {
   name: 'Problem',
+  props: ['p', 'problemid'],
   data () {
     return {
       selectedValue: ''
@@ -46,16 +41,33 @@ export default {
         // Handle with select THE choice
         // console.log(op["choiceid"]);
         var choiceid = op["choiceid"];
-        this.selectedValue = choiceid;
-        var eleList = document.getElementsByClassName('choice-content');
+        this.selectedValue = op["val"];
+        var eleList = document.getElementById('p'+this.problemid).children[1].children;
         var eleCount = eleList.length;
         for (var i = 0; i < eleCount; i++) {
-          if (eleList[i].id === choiceid) {
-            eleList[i].className = "choice-content choice-content-active";
+          if (eleList[i].children[0].id === choiceid) {
+            eleList[i].children[0].className = "choice-content choice-content-active";
           } else {
-            eleList[i].className = "choice-content";
+            eleList[i].children[0].className = "choice-content";
           }
         }
+      }
+    }
+  },
+  mounted () {
+    if (this.p.status === 1) {
+      this.selectedValue = this.p.choices[this.p.draft];
+      document.getElementById('p'+this.problemid+'ch'+this.p.draft).className = "choice-content choice-content-active";
+      console.log(this.selectedValue);
+    }
+  },
+  watch: {
+    selectedValue: function (curVal) {
+      if (curVal === '') {
+        this.$emit('remove', {index: this.problemid});
+      } else {
+        console.log("problem emit", this.selectedValue);
+        this.$emit('choose', {index: this.problemid, val: this.selectedValue});
       }
     }
   }
@@ -66,6 +78,8 @@ export default {
 .problem-wrap {
   background-color: #fff;
   padding: 15px 20px;
+  height: 350px;
+  overflow-y: auto;
 }
 .problem-content {
   padding-bottom: 20px;
@@ -77,8 +91,5 @@ export default {
   color: #1c2438;
   padding: 0 10px;
 }
-.problem-button-wrap {
-  float: right;
-  padding-left: 10px;
-}
+
 </style>

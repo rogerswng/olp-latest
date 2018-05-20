@@ -4,16 +4,16 @@
     <div class="content-wrap">
       <div class="practice-content">
         <div class="practice-detail-title">
-          <p>课后练习</p>
+          <p>{{ title }}</p>
         </div>
         <div class="practice-detail-relation">
-          <p>Java 语言基础 / Java 的流控制语句 / 程序的基本思想</p>
+          <p>{{ relation }}</p>
         </div>
         <div class="practice-detail-info">
-          <p>36 人完成 · 平均 90 分 · 平均用时 12 分</p>
+          <p>{{ info }}</p>
         </div>
         <div class="practice-button-wrap">
-          <Button type="primary">开始练习</Button>
+          <router-link :to="{ name: 'PracticeDetail', params: {id: id} }"><Button type="primary">开始练习</Button></router-link>
           <div class="float-clear">
           </div>
         </div>
@@ -29,7 +29,10 @@ export default {
   name: 'Practice',
   data () {
     return {
-
+      id: '123124234',
+      title: '课后练习',
+      relation: 'Java 语言基础 / Java 的流控制语句 / 程序的基本思想',
+      info: '36 人完成 · 平均 90 分 · 平均用时 12 分'
     }
   },
   created () {
@@ -89,7 +92,7 @@ export default {
   white-space: pre-wrap;
 }
 
-.practice-button-wrap>button {
+.practice-button-wrap>a>button {
   float: left;
 }
 </style>

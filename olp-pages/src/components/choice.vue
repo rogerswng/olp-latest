@@ -1,7 +1,7 @@
 <template lang="html">
   <div class="choice-wrap">
     <div :id="choiceid" :class="choiceclass" @click="onSelected($event)">
-      <p>cerr</p>
+      <p>{{ ch }}</p>
     </div>
   </div>
 </template>
@@ -14,7 +14,7 @@ export default {
 
     }
   },
-  props: ["choiceid", "choiceclass"],
+  props: ["choiceid", "choiceclass", 'ch'],
   methods: {
     onSelected: function(e) {
       // console.log(e.path[1]);
@@ -22,11 +22,11 @@ export default {
       var ele = document.getElementById(choiceid);
       var classNames = ele.attributes["class"].value;
       if (classNames.indexOf("choice-content-active") != -1) {
-        this.$emit("choiceselected", {status: 1, choiceid: choiceid});
+        this.$emit("choiceselected", {status: 1, choiceid: choiceid, val: this.ch});
         ele.className = "choice-content";
       }
       else {
-        this.$emit("choiceselected", {status: 0, choiceid: choiceid});
+        this.$emit("choiceselected", {status: 0, choiceid: choiceid, val: this.ch});
       }
     }
   }

@@ -30,8 +30,9 @@
           </div>
         </Upload>
       </div>
-      <div class="createsection-insert-doc" style="display: none;" id="editDoc">
-        <mavon-editor style="height: 500px; width: 805px;" />
+      <div class="createsection-insert-doc" style="display: none; width: 790px;" id="editDoc">
+        <!-- <mavon-editor style="height: 500px; width: 805px;" /> -->
+        <EditorMd :isView="docshow" style="z-index: 10000;"/>
       </div>
       <div class="hr-wrap">
         <hr />
@@ -44,6 +45,7 @@
 <script>
 import mavonEditor from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
+import EditorMd from './mdeditor';
 import Hub from '../assets/hub.js';
 
 export default {
@@ -52,7 +54,8 @@ export default {
     return {
       entityType: 'video',
       id: '',
-      sectionTitle: ''
+      sectionTitle: '',
+      docshow: false
     }
   },
   created () {
@@ -64,7 +67,8 @@ export default {
     })
   },
   components: {
-    'mavon-editor': mavonEditor.mavonEditor
+    'mavon-editor': mavonEditor.mavonEditor,
+    'EditorMd': EditorMd
   },
   methods: {
     handleChange: function (cur) {
@@ -74,6 +78,7 @@ export default {
       } else if (cur === 'doc') {
         document.getElementById('editVideo').style.display = "none";
         document.getElementById('editDoc').style.display = "block";
+        this.docshow = true;
       }
     }
   }

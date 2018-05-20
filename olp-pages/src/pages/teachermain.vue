@@ -3,8 +3,8 @@
     <Header />
     <div class="content-wrap">
       <div class="content">
-        <TeacherLeftNav />
         <router-view />
+        <TeacherLeftNav />
         <div class="float-clear">
         </div>
       </div>

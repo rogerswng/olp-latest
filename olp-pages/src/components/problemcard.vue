@@ -3,12 +3,15 @@
     <div class="problemcard-title-wrap">
       <p>答题卡</p>
     </div>
-    <div class="problemcard-nav-wrap">
-      <div id="p1" class="problemcard-nav problemcard-cur" @click="pSelected($event)">
+    <div class="problemcard-nav-wrap" id="practicecard">
+      <div v-for="i in handleCreate" class="problemcard-nav" :id="'pc'+i" style="cursor: pointer;" @click="pSelected($event)">
+        <p>{{ i+1 }}</p>
+      </div>
+      <!-- <div id="pc1" class="problemcard-nav problemcard-cur" @click="pSelected($event)">
         <p>1</p>
       </div>
-      <div id="p2" class="problemcard-nav problemcard-no" @click="pSelected($event)">
-        <p>2</p>
+      <div id="pc2" class="problemcard-nav problemcard-no" @click="pSelected($event)">
+        <p>2</p> -->
       </div>
       <div class="float-clear">
       </div>
@@ -17,21 +20,72 @@
 </template>
 
 <script>
+import $ from 'jquery';
+
 export default {
   name: 'ProblemCard',
   data () {
     return {
-
+      handleCreate: []
     }
   },
+  props: ['problemcount', 'curproblem'],
   methods: {
     pSelected: function (e) {
       var pid = e.path[1].attributes["id"].value;
       var ele = document.getElementById(pid);
       var className = ele.attributes["class"].value;
-      if (className.indexOf('problemcard-cur')) {
+      var curid, nxtid;
+      console.log(pid, ele, className);
+      if (className.indexOf('problemcard-cur') != -1) {
+        return;
+      } else {
+        var l = $("#practicecard").children();
+        console.log(l);
+        for (var i = 0; i < l.length; i++) {
+          if (l[i].id === pid) {
+            $("#"+pid).addClass("problemcard-cur");
+            nxtid = i;
+          } else if (l[i].className.indexOf("problemcard-cur") != -1) {
+            $("#"+l[i].id).removeClass("problemcard-cur");
+            curid = i;
+          }
+        }
+        this.$emit('change', {next: nxtid});
+        curid = "p"+curid;
+        nxtid = "p"+nxtid;
+        document.getElementById(curid).style.display = "none";
+        document.getElementById(nxtid).style.display = "block";
       }
+    },
+    initCard: function () {
+      // $("#pc0").attr({style: "display: block; cursor: pointer;"}).addClass("problemcard-cur");
+      // $("#p0").attr({style: "display: block;"});
+      document.getElementById('pc0').style.display = 'block';
+      document.getElementById('pc0').style.cursor = 'pointer';
+      document.getElementById('pc0').className += ' problemcard-cur';
+      document.getElementById('p0').style.display = 'block';
     }
+  },
+  created () {
+    for (var i = 0; i < this.problemcount; i++) {
+      this.handleCreate.push(i);
+      // console.log('push here');
+    }
+    // this.initCard();
+    // console.log(this.handleCreate);
+  },
+  mounted () {
+    this.initCard();
+  },
+  watch: {
+    // curproblem: function (cur) {
+    //   var curid = "pc"+cur;
+    //   var eles = document.getElementById('practice-card').children;
+    //   for (var i = 0; i < eles.length; i++) {
+    //     if (eles[i].id === curid)
+    //   }
+    // }
   }
 }
 </script>
@@ -65,6 +119,8 @@ export default {
   padding: 8px 0;
 }
 .problemcard-cur, .problemcard-yes {
+  transition-property: background-color,color;
+  transition-duration: 300ms;
   background-color: #2d8cf0;
   color: #fff;
 }
