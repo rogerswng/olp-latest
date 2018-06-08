@@ -5,13 +5,11 @@
     </div>
     <div class="problem-choices-wrap">
       <template v-for="(ch, index) in p.choices">
-        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" />
+        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" :status="p.status" v-if="p.status === 0 || p.status === 1" />
+        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content choice-content-correct" @choiceselected="listenToSelected" :status="p.status" v-else-if="p.status === 2 && p.correctAnswer === index" />
+        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content choice-content-false" @choiceselected="listenToSelected" :status="p.status" v-else-if="p.status === 2 && p.draft === index" />
+        <Choice :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" :status="p.status" v-else />
       </template>
-      <!-- <Choice v-for="(ch, index) in p.choices" :choiceid="'p'+problemid+'ch'+index" :ch="ch" choiceclass="choice-content" @choiceselected="listenToSelected" /> -->
-      <!-- <Choice choiceid="1" choiceclass="choice-content" @choiceselected="listenToSelected" />
-      <Choice choiceid="2" choiceclass="choice-content" @choiceselected="listenToSelected" />
-      <Choice choiceid="3" choiceclass="choice-content" @choiceselected="listenToSelected" />
-      <Choice choiceid="4" choiceclass="choice-content" @choiceselected="listenToSelected" /> -->
     </div>
   </div>
 </template>

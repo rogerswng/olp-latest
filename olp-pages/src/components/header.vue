@@ -2,7 +2,8 @@
   <div class="header-wrap">
     <div class="header">
       <div class="header-label">
-        <p>Online Learning</p>
+        <router-link :to="{ name: 'StudentCourse' }" v-if="this.character === '0'"><p>Online Learning</p></router-link>
+        <router-link :to="{ name: 'TeacherMain' }" v-if="this.character === '1'"><p>Online Learning</p></router-link>
       </div>
       <div class="userInfo">
         <div class="avatar">
@@ -25,7 +26,8 @@
     name: 'Header',
     data () {
       return {
-        username: this.$getCookie('username')
+        username: this.$getCookie('username'),
+        character: this.$getCookie('character')
       }
     }
   }
@@ -50,7 +52,7 @@
   vertical-align: middle;
   padding: 5px 0;
 }
-.header-label>p {
+.header-label>a>p {
   font-size: 1.5rem;
   font-weight: bold;
   color: #2d8cf0;

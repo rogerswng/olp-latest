@@ -34,7 +34,7 @@
             <div class="courselist-teacher-info">
               <SmallTeacherInfo :teachername="course.teacher" />
             </div>
-            <div class="last-progress" v-if="JSON.stringify(course.lastProgress) != '{}'">
+            <div class="last-progress" v-if="course.lastProgress.title != ''">
               <p>上次学到   <router-link :to="{ name: 'Section', params: {id: course.lastProgress.id} }"><span class="last-progress-section">{{course.lastProgress.title}}</span></router-link></p>
             </div>
             <div class="last-progress" v-else>
@@ -54,38 +54,53 @@
 
 <script>
 import SmallTeacherInfo from './smallteacherinfo';
+import axios from 'axios';
 
 export default {
   name: 'StudentCourseList',
   data () {
     return {
       // 请求远端接口，返回每个课程的信息
-      courses: [
-        {
-          id: '123',
-          title: 'Android 应用开发工程师职业规划',
-          desc: '本课程主要向大家介绍 Android 应用开发工程师的职业背景、行业前景、团队中的定位及所需的技能，同时分享 Android 应用开发的学习方法和路径以及将来的职业规划',
-          teacher: '老师 A',
-          lastProgress: {
-            id: '234',
-            title: 'Android 应用开发工程师职业规划'
-          }
-        },
-        {
-          id: '345',
-          title: 'Android 应用开发工程师 II',
-          desc: 'Test 课程描述在这里',
-          teacher: '老师 B',
-          lastProgress: {
-          }
-        }
-      ],
-      page: 0,
-      totalPage: 10
+      courses: []
+      // courses: [
+      //   {
+      //     id: '123',
+      //     title: 'Android 应用开发工程师职业规划',
+      //     desc: '本课程主要向大家介绍 Android 应用开发工程师的职业背景、行业前景、团队中的定位及所需的技能，同时分享 Android 应用开发的学习方法和路径以及将来的职业规划',
+      //     teacher: '老师 A',
+      //     lastProgress: {
+      //       id: '234',
+      //       title: 'Android 应用开发工程师职业规划'
+      //     }
+      //   },
+      //   {
+      //     id: '345',
+      //     title: 'Android 应用开发工程师 II',
+      //     desc: 'Test 课程描述在这里',
+      //     teacher: '老师 B',
+      //     lastProgress: {
+      //     }
+      //   }
+      // ],
+      // page: 0,
+      // totalPage: 10
+    }
+  },
+  methods: {
+    initComp: function() {
+      var userId = this.$getCookie("uid");
+
+      axios.get("http://"+this.BASEURL+"/studentCourseList?userId="+userId).then(function(res) {
+        // console.log(res);
+        this.courses = res.data.courses;
+      }.bind(this))
     }
   },
   components: {
     'SmallTeacherInfo': SmallTeacherInfo
+  },
+  mounted () {
+    this.initComp();
   }
 }
 </script>

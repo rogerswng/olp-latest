@@ -7,10 +7,32 @@
       </div>
       <div class="teacherpracticecreate-basic-info">
         <p style="text-align: left; font-size: 1.1rem; font-weight: bold; padding-bottom: 15px;">练习基本信息</p>
-        <div class="teacherpracticecreate-title teacherpracticecreate-input">
+        <div class="teacherpracticecreate-title teacherpracticecreate-input" style="text-align:left;">
           <span>练习名</span>
           <div class="teacherpracticecreate-input-wrap">
             <Input v-model="title" size="large" placeholder="练习名" />
+          </div>
+          <p style="padding: 10px 0; font-size:1.1em; font-weight:bold;">练习关联课程</p>
+          <p style="padding-bottom: 10px; font-size:1.1em; white-space:pre-wrap;" v-if="this.type==='edit'">已关联  {{this.relation}}</p>
+          <div class="teacherpracticecreate-course-relation">
+            <div class="course-dropdown">
+              <span>课程</span>
+              <Select v-model="relatedCourse" @on-change="handleChangeCourse">
+                <Option v-for="course in courses" :value="course.value" :key="course.value">{{course.title}}</Option>
+              </Select>
+            </div>
+            <div class="topic-dropdown" style="display: block;">
+              <span>章节</span>
+              <Select v-model="relatedTopic" @on-change="handleChangeTopic">
+                <Option v-for="topic in topics" :value="topic.value" :key="topic.value">{{topic.title}}</Option>
+              </Select>
+            </div>
+            <div class="section-dropdown" style="display: block;">
+              <span>小节</span>
+              <Select v-model="relatedSection">
+                <Option v-for="section in sections" :value="section.value" :key="section.value">{{section.title}}</Option>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
@@ -71,17 +93,27 @@
 import ChoiceItem from './choiceitem';
 import Hub from '../assets/hub.js';
 import PracticeCreateItem from './practicecreateitem';
+import axios from 'axios';
 var v;
 
 export default {
   name: 'TeacherPracticeEdit',
   data () {
     return {
+      id: this.$route.params.practiceid,
+      relation: '',
+      relatedCourse: '',
+      relatedTopic: '',
+      relatedSection: '',
+      courses: [],
+      topics: [],
+      sections: [],
       curProblemStatus: 0, // 记录下面的临时变量来自于编辑题目还是新建题目 0-新建，1-编辑
       curProblemIndex: 0, // 记录编辑题目的偏移量
       type: '',
       fakeid: '', // ONLY DEBUGUSE
       title: '',
+      problemid: '',
       problem: '',
       choiceCount: 0, // 临时变量，当前 choice 的数目
       choices: [],
@@ -116,25 +148,89 @@ export default {
         this.choices = [];
         this.correctAnswer = '';
 
+        axios.get("http://"+this.BASEURL+"/teacherCourse?uid="+this.$getCookie("uid")).then(function(res) {
+          if (res.data.success) {
+            var courses = res.data.courses;
+            if (courses.length) {
+              this.courses = courses;
+            }
+          }
+        }.bind(this));
+
       } else if (this.$route.name.indexOf("TeacherPracticeEdit") != -1) {
         // Edit Practice
         this.type = 'edit';
-        this.title = 'Practice Title from remote server...';
-        this.problemList = [
-          {
-            id: Math.ceil(Math.random()*100000).toString(),
-            problem: 't1',
-            choices: [
-              {
-                cid: 0,
-                value: 'ch1'
-              }
-            ],
-            correctAnswer: 'ch1'
+        axios.get("http://"+this.BASEURL+"/editPractice?practiceId="+this.$route.params.practiceid).then(function(res) {
+          console.log(res);
+          if (res.data.success) {
+            this.title = res.data.title;
+            this.problemList = res.data.problemList;
+            this.relation = res.data.relation;
           }
-        ];
-        this.fakeid = this.problemList[0].id;
+        }.bind(this));
+        axios.get("http://"+this.BASEURL+"/teacherCourse?uid="+this.$getCookie("uid")).then(function(res) {
+          if (res.data.success) {
+            var courses = res.data.courses;
+            if (courses.length) {
+              this.courses = courses;
+            }
+          }
+        }.bind(this));
+        // this.title = 'Practice Title from remote server...';
+        // this.problemList = [
+        //   {
+        //     id: Math.ceil(Math.random()*100000).toString(),
+        //     problem: 't1',
+        //     choices: [
+        //       {
+        //         cid: 0,
+        //         value: 'ch1'
+        //       }
+        //     ],
+        //     correctAnswer: 'ch1'
+        //   }
+        // ];
+        // this.fakeid = this.problemList[0].id;
         document.getElementById('problemsdetail').style.display = "block";
+      }
+    },
+    handleChangeCourse: function() {
+      this.relatedTopic = '';
+      this.relatedSection = '';
+      this.topics = [];
+      this.sections = [];
+      console.log(this.relatedCourse);
+      axios.get("http://"+this.BASEURL+"/teacherTopic?courseId="+this.relatedCourse).then(function(res) {
+        if (res.data.success) {
+          var topics = res.data.topics;
+          if (topics.length) {
+            topics.unshift({
+              value: "0",
+              title: "不选择章节"
+            });
+            this.topics = topics;
+          }
+        }
+      }.bind(this));
+    },
+    handleChangeTopic: function() {
+      this.relatedSection = '';
+      this.sections = [];
+      if (this.relatedTopic === "0") {
+        return;
+      } else {
+        axios.get("http://"+this.BASEURL+"/teacherSection?topicId="+this.relatedTopic).then(function(res) {
+          if (res.data.success) {
+            var sections = res.data.sections;
+            if (sections.length) {
+              sections.unshift({
+                value: "0",
+                title: "不选择小节"
+              });
+              this.sections = sections;
+            }
+          }
+        }.bind(this));
       }
     },
     handleNewChoice: function () {
@@ -148,6 +244,7 @@ export default {
       document.getElementById('plus').style.display = "none";
       document.getElementById('minus').style.display = "block";
       this.curProblemStatus = 0;
+      this.curProblemIndex = this.problemList.length;
     },
     handleCollapse: function () {
       document.getElementById('minus').style.display = "none";
@@ -168,6 +265,7 @@ export default {
       // }
       for (var i = 0; i < this.problemList.length; i++) {
         if (this.problemList[i].id === problemid) {
+          this.problemid = this.problemList[i].id;
           this.problem = this.problemList[i].problem;
           this.choices = this.problemList[i].choices;
           this.correctAnswer = this.problemList[i].correctAnswer;
@@ -189,8 +287,15 @@ export default {
       for (var i = 0; i < this.problemList.length; i++) {
         if (this.problemList[i].id === problemid) {
           console.log('Here');
-          this.problemList.splice(i, 1);
-          return;
+          axios.delete("http://"+this.BASEURL+"/editProblem?problemId="+problemid).then(function(res) {
+            console.log(res);
+            if (res.data.success) {
+              alert("Success!");
+              // this.problemList.splice(i, 1);
+              window.location.reload();
+              return;
+            }
+          }.bind(this));
         }
       }
     },
@@ -213,40 +318,101 @@ export default {
         // create
         // api.createProblem here
         // callback id and content
+        var ch = [];
+        for (var i = 0; i < this.choices.length; i++) {
+          ch[i] = this.choices[i].value;
+        }
         var d = {
-          id: Math.ceil(Math.random()*1000000).toString(),
-          problem: this.problem,
-          choices: this.choices,
-          correctAnswer: this.correctAnswer
+          practiceId: this.id,
+          index: this.curProblemIndex,
+          content: this.problem,
+          choices: ch,
+          answer: this.correctAnswer
         };
-        this.problemList.push(d);
+        console.log(d);
+        axios.post("http://"+this.BASEURL+"/createProblem",d).then(function(res) {
+          if (res.data.success) {
+            console.log(res);
+            this.problemList = res.data.problemList;
+          }
+        }.bind(this));
       } else if (this.curProblemStatus === 1) {
         // Edit & Save
         // api.updateProblem here
         // callback id and content
-        var da = {
-          id: this.fakeid,
-          problem: this.problem,
-          choices: this.choices,
-          correctAnswer: this.correctAnswer
+        var ch = [];
+        for (var i = 0; i < this.choices.length; i++) {
+          ch[i] = this.choices[i].value;
         }
-        this.problemList.splice(this.curProblemIndex, 1, da);
+        var d = {
+          practiceId: this.id,
+          problemId: this.problemid,
+          index: this.curProblemIndex,
+          content: this.problem,
+          choices: ch,
+          answer: this.correctAnswer
+        };
+        console.log(d);
+        axios.put("http://"+this.BASEURL+"/editProblem",d).then(function(res) {
+          if (res.data.success) {
+            console.log(res);
+            this.problemList.splice(d.index,1,res.data.problemList[d.index]);
+          }
+        }.bind(this));
+        // var da = {
+        //   id: this.fakeid,
+        //   problem: this.problem,
+        //   choices: this.choices,
+        //   correctAnswer: this.correctAnswer
+        // }
+        // this.problemList.splice(this.curProblemIndex, 1, da);
       }
-
+      this.problemid = '';
       this.problem = '';
       this.choices = [];
       this.problemCount = 0;
       this.correctAnswer = '';
-      console.log(this.problemList);
+      // console.log(this.problemList);
     },
     handleSave: function () {
       if (this.title === '') {
         alert("练习名不得为空");
         return;
       }
-      alert("保存成功！");
-      this.$router.push({path: '/teachermain/practiceEdit/12487236529384'});
-      window.location.reload();
+      if (this.type === 'create') {
+        var d = {
+          userId: this.$getCookie("uid"),
+          title: this.title,
+          relatedCourse: this.relatedCourse,
+          relatedTopic: this.relatedTopic,
+          relatedSection: this.relatedSection
+        };
+        axios.post("http://"+this.BASEURL+"/createPractice", d).then(function(res) {
+          // console.log(res);
+          alert("Save Successfully!");
+          this.$router.push({path: '/teachermain/practiceEdit/'+res.data.id});
+          window.location.reload();
+        }.bind(this));
+      } else if (this.type === 'edit') {
+        var d = {
+          practiceId: this.id,
+          title: this.title,
+          relatedCourse: this.relatedCourse,
+          relatedTopic: this.relatedTopic,
+          relatedSection: this.relatedSection
+        };
+        axios.put("http://"+this.BASEURL+"/editPractice",d).then(function(res) {
+          console.log(res);
+          if (res.data.success) {
+            alert ("Success!");
+            window.location.reload();
+          }
+        })
+      }
+      // alert("保存成功！");
+      // axios.post("")
+      // this.$router.push({path: '/teachermain/practiceEdit/12487236529384'});
+      // window.location.reload();
     }
   },
   created () {

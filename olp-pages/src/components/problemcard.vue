@@ -59,33 +59,35 @@ export default {
       }
     },
     initCard: function () {
+      for (var i = 0; i < this.problemcount; i++) {
+        this.handleCreate.push(i);
+        // console.log('push here');
+      }
       // $("#pc0").attr({style: "display: block; cursor: pointer;"}).addClass("problemcard-cur");
       // $("#p0").attr({style: "display: block;"});
-      document.getElementById('pc0').style.display = 'block';
-      document.getElementById('pc0').style.cursor = 'pointer';
-      document.getElementById('pc0').className += ' problemcard-cur';
-      document.getElementById('p0').style.display = 'block';
+
     }
   },
   created () {
-    for (var i = 0; i < this.problemcount; i++) {
-      this.handleCreate.push(i);
-      // console.log('push here');
-    }
+
     // this.initCard();
     // console.log(this.handleCreate);
   },
   mounted () {
-    this.initCard();
+    console.log(this.problemcount);
+    // this.initCard();
   },
   watch: {
-    // curproblem: function (cur) {
-    //   var curid = "pc"+cur;
-    //   var eles = document.getElementById('practice-card').children;
-    //   for (var i = 0; i < eles.length; i++) {
-    //     if (eles[i].id === curid)
-    //   }
-    // }
+    problemcount: function () {
+      this.initCard();
+    }
+  },
+  updated () {
+    console.log("update");
+    document.getElementById('pc0').style.display = 'block';
+    document.getElementById('pc0').style.cursor = 'pointer';
+    document.getElementById('pc0').className += ' problemcard-cur';
+    document.getElementById('p0').style.display = 'block';
   }
 }
 </script>

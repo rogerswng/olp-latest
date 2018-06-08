@@ -21,6 +21,7 @@ import TeacherTopicEdit from '../components/teachertopicedit';
 import TeacherPracticeEdit from '../components/teacherpracticeedit';
 import TeacherCourseEdit from '../components/teachercourseedit';
 import TeacherSectionEdit from '../components/editsection';
+import ImportStudent from '../components/importstudent';
 
 
 Vue.use(Router);
@@ -29,6 +30,13 @@ var cookieop = require('../utils/cookieop');
 
 export default new Router({
   mode: 'history',
+  scrollBehavior (to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        selector: to.hash
+      };
+    }
+  },
   routes: [
     {
       path: '/',
@@ -59,7 +67,7 @@ export default new Router({
       component: StudentMain,
       children: [
         {
-          path:'',
+          path:'/',
           name: 'StudentCourse',
           component: StudentCourseList
         },
@@ -154,6 +162,11 @@ export default new Router({
           path: 'practiceEdit/:practiceid',
           name: 'TeacherPracticeEdit',
           component: TeacherPracticeEdit
+        },
+        {
+          path: 'importStudent/:courseid',
+          name: 'ImportStudent',
+          component: ImportStudent
         }
       ]
     }

@@ -25,25 +25,23 @@ export default {
   name: 'VideoPlayer',
   data () {
     return {
-      videoId: '12376345',
-      vlength: 1126,
-      url: '/static/test400k.mp4'
     }
   },
-  props: ['videoid', 'relatedcourse'],
+  props: ['videoid', 'videourl', 'relatedcourse'],
   created () {
     console.log(this.videoid);
     console.log(this.relatedcourse);
   },
   mounted () {
     var player = document.getElementById('videoElement');
+    var conf = {
+      type: 'mp4',
+      url: this.videourl
+    }
     console.log("videoelement: "+player);
     if (flvjs.isSupported()) {
       console.log("here!");
-      var flvPlayer = flvjs.createPlayer({
-        type: 'mp4',
-        url: '/static/test400k.mp4'
-      });
+      var flvPlayer = flvjs.createPlayer(conf);
       flvPlayer.attachMediaElement(player);
       flvPlayer.load();
       // this.vp = player;

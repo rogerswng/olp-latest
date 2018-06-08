@@ -1,6 +1,9 @@
 <template lang="html">
   <div class="choice-wrap">
-    <div :id="choiceid" :class="choiceclass" @click="onSelected($event)">
+    <div :id="choiceid" :class="choiceclass" @click="onSelected($event)" style="cursor:auto;" v-if="status === 2">
+      <p>{{ ch }}</p>
+    </div>
+    <div :id="choiceid" :class="choiceclass" @click="onSelected($event)" v-else>
       <p>{{ ch }}</p>
     </div>
   </div>
@@ -14,19 +17,23 @@ export default {
 
     }
   },
-  props: ["choiceid", "choiceclass", 'ch'],
+  props: ["choiceid", "choiceclass", 'ch', 'status'],
   methods: {
     onSelected: function(e) {
       // console.log(e.path[1]);
-      var choiceid = e.path[1].attributes["id"].value;
-      var ele = document.getElementById(choiceid);
-      var classNames = ele.attributes["class"].value;
-      if (classNames.indexOf("choice-content-active") != -1) {
-        this.$emit("choiceselected", {status: 1, choiceid: choiceid, val: this.ch});
-        ele.className = "choice-content";
-      }
-      else {
-        this.$emit("choiceselected", {status: 0, choiceid: choiceid, val: this.ch});
+      if (this.status === 0 || this.status === 1) {
+        var choiceid = e.path[1].attributes["id"].value;
+        var ele = document.getElementById(choiceid);
+        var classNames = ele.attributes["class"].value;
+        if (classNames.indexOf("choice-content-active") != -1) {
+          this.$emit("choiceselected", {status: 1, choiceid: choiceid, val: this.ch});
+          ele.className = "choice-content";
+        }
+        else {
+          this.$emit("choiceselected", {status: 0, choiceid: choiceid, val: this.ch});
+        }
+      } else if (this.status === 2) {
+        return;
       }
     }
   }

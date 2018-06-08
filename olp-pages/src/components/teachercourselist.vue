@@ -16,8 +16,8 @@
           </div>
           <div class="teachercourselist-button-group">
             <router-link :to="{ name: 'TeacherCourseEdit', params: {id: course.id} }"><Button type="primary">编辑课程</Button></router-link>
-            <Button type="primary" @click="handleImportStudent">导入学生</Button>
-            <Button type="error" @click="handleRemove">下线课程</Button>
+            <router-link :to="{ name: 'ImportStudent', params: {courseid: course.id} }"><Button type="primary" @click="handleImportStudent">导入学生</Button></router-link>
+            <!-- <Button type="error" @click="handleRemove">下线课程</Button> -->
           </div>
           <div class="float-clear">
           </div>
@@ -51,18 +51,21 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'TeacherCourseList',
   data () {
     return {
-      courses: [
-        {
-          id: '123t64192301',
-          title: 'Android 应用开发工程师职业规划',
-          info: '4 主题 / 23 小节 / 40 练习',
-          students: 32
-        }
-      ]
+      courses: []
+      // courses: [
+      //   {
+      //     id: '123t64192301',
+      //     title: 'Android 应用开发工程师职业规划',
+      //     info: '4 主题 / 23 小节 / 40 练习',
+      //     students: 32
+      //   }
+      // ]
     }
   },
   methods: {
@@ -71,7 +74,23 @@ export default {
     },
     handleRemove: function () {
       console.log("handle remove");
+    },
+    initComp: function () {
+      var userId = this.$getCookie("uid");
+      axios.get("http://"+this.BASEURL+"/teacherCourseList?userId="+userId).then(function(res) {
+        // console.log(res);
+        var c = res.data.courses;
+        console.log(c);
+        for (var i = 0; i < c.length; i++) {
+          c[i].students = c[i].count[3];
+          c[i].info = c[i].count[0]+" Topics / "+c[i].count[1]+" Sections / "+c[i].count[2]+" Practices";
+        }
+        this.courses = c;
+      }.bind(this));
     }
+  },
+  mounted () {
+    this.initComp();
   }
 }
 </script>

@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'TeacherTopicEdit',
   data () {
@@ -32,7 +34,7 @@ export default {
       courseid: '',
       topicid: '',
       type: '',
-      title: 'Android 应用工程师职业规划',
+      title: '',
       topicTitle: ''
     }
   },
@@ -40,24 +42,59 @@ export default {
     handleCancel: function () {
       // console.log(this.$route.params);
       this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+      // window.location.reload();
     },
     handleSave: function () {
       console.log(this.topicTitle);
-      alert("保存成功！");
-      this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
-      // this.$router.push({path: '/teachermain/courseEdit/'+this.id});
+      if (this.type === 'create') {
+        var d = {
+          courseId: this.courseid,
+          title: this.topicTitle
+        }
+        axios.post("http://"+this.BASEURL+"/createTopic", d).then(function(res) {
+          if (res.data.state === 'success') {
+            alert("保存成功，topicid"+res.data.topic_id);
+            this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+          }
+        }.bind(this));
+      } else if (this.type === 'edit') {
+        // alert('edit');
+        var d = {
+          topicId: this.topicid,
+          topicTitle: this.topicTitle
+        }
+        axios.put("http://"+this.BASEURL+"/editTopic", d).then(function(res) {
+          if(res.data.success) {
+            alert("保存成功!");
+            this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+          }
+        }.bind(this));
+      }
+      // alert("保存成功！");
+      // this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+      // // this.$router.push({path: '/teachermain/courseEdit/'+this.id});
       // if (this.type = )
     },
     initComp: function () {
+      // console.log(this.$route.name)
       if (this.$route.name.indexOf("TeacherTopicCreate") != -1) {
         this.courseid = this.$route.params.courseid;
         this.type = "create";
+        axios.get("http://"+this.BASEURL+"/courseTitle?courseId="+this.courseid).then(function(res) {
+          this.title = res.data.title;
+        }.bind(this));
         this.topicTitle = "";
       } else if (this.$route.name.indexOf("TeacherTopicEdit") != -1) {
         this.courseid = this.$route.params.courseid;
-        this.topicid = this.$route.params.id;
+        this.topicid = this.$route.params.topicid;
         this.type = "edit";
-        this.topicTitle = "DataLoadfromRemoteServer";
+        axios.get("http://"+this.BASEURL+"/courseTitle?courseId="+this.courseid).then(function (res) {
+          this.title=res.data.title;
+        }.bind(this));
+        axios.get("http://"+this.BASEURL+"/topicTitle?topicId="+this.topicid).then(function(res) {
+          this.topicTitle = res.data.title
+        }.bind(this));
+        // this.topicTitle = "DataLoadfromRemoteServer";
       }
       // Data Request and load
     }

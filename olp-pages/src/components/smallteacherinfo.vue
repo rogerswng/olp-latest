@@ -4,7 +4,7 @@
       <Avatar type="person" size="small" />
     </div>
     <div class="smallteacherinfo-name">
-      <p>{{teacher}}</p>
+      <p>{{teachername}}</p>
     </div>
     <div class="float-clear">
     </div>

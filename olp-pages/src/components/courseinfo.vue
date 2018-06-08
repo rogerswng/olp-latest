@@ -1,10 +1,10 @@
 <template lang="html">
   <div class="courseinfo-main">
     <div class="courseinfo-title">
-      <p>{{title}}</p>
+      <p>{{coursetitle}}</p>
     </div>
     <div class="courseinfo-teacherinfo">
-      <SmallTeacherInfo :teachername="teacher" />
+      <SmallTeacherInfo :teachername="teachername" />
     </div>
   </div>
 </template>

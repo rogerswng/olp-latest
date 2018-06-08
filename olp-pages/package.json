@@ -17,6 +17,7 @@
     "jquery": "^3.3.1",
     "mavon-editor": "^2.6.3",
     "scriptjs": "^2.5.8",
+    "underscore": "^1.9.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "webpack-zepto": "^0.0.1",

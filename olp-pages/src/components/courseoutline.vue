@@ -4,29 +4,29 @@
       <div class="courseoutline-label">
         <p>课时列表</p>
       </div>
-      <div class="courseoutline-topic" v-for="(course, index) in coursecontent">
+      <div class="courseoutline-topic" v-for="(topic, index) in coursecontent">
         <div class="courseoutline-topic-title">
-          <p>第 {{index+1}} 课 · {{course.topic}}</p>
+          <p>第 {{index+1}} 课 · {{topic.title}}</p>
         </div>
         <div class="courseoutline-section-list">
-          <div class="courseoutline-section-item" v-for="(section, i) in course.sections">
+          <div class="courseoutline-section-item" v-for="(section, i) in topic.sections">
             <div class="section-info">
-              <div class="section-number section-number-off" v-if="section.status === 0">
+              <div class="section-number section-number-off" v-if="section.process === 0">
                 <p>{{ i+1 }}</p>
               </div>
-              <div class="section-number section-number-learning" v-else-if="section.status === 1">
+              <div class="section-number section-number-finish" v-else-if="section.process === 1">
                 <p>{{ i+1 }}</p>
               </div>
-              <div class="section-number section-number-finish" v-else-if="section.status === 2">
+              <div class="section-number section-number-learning" v-else>
                 <p>{{ i+1 }}</p>
               </div>
               <div class="section-title">
-                <p style=""><router-link :to="{ name: 'Section', params: {id: section.id} }"><span>{{ section.title }}</span></router-link></p>
+                <p style=""><router-link :to="{ name: 'Section', params: {id: section.section_id} }"><span>{{ section.title }}</span></router-link></p>
               </div>
-              <div class="section-other video-time-wrap" v-if="section.entity.type === 'video'">
-                <p>{{ parseDuration(section.entity.duration) }}</p>
+              <div class="section-other video-time-wrap" v-if="section.entityType === 'video'">
+                <p>{{ parseDuration(section.entity) }}</p>
               </div>
-              <div class="section-other video-time-wrap" v-else-if="section.entity.type === 'doc'">
+              <div class="section-other video-time-wrap" v-else-if="section.entityType === 'doc'">
                 <p>讲义</p>
               </div>
               <div class="float-clear">

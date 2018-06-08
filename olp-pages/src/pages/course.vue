@@ -16,64 +16,86 @@
 import Header from '../components/header';
 import CourseInfo from '../components/courseinfo';
 import CourseOutline from '../components/courseoutline';
+import axios from 'axios';
 
 export default {
   name: 'Course',
   data () {
     return {
-      title: 'Android 项目开发实战 —— 4 个实战项目 7 天学会 Android 经典教程',
-      teacher: '老师 A',
+      title: '',
+      teacher: '',
       content: [
-        {
-          topic: '初识 Java',
-          sections: [
-            {
-              id: '12345',
-              title: 'Java 简介 I',
-              desc: '本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况',
-              entity: {
-                type: 'video',
-                duration: 1128
-              },
-              status: 2 // 学习完成
-            },
-            {
-              id: '67890',
-              title: 'Java 简介 II',
-              desc: 'Testtesttest 00000',
-              entity: {
-                type: 'doc'
-              },
-              status: 1 // 正在学习
-            },
-            {
-              id: '12345',
-              title: 'Java 简介 III',
-              desc: 'Testtesttest description',
-              entity: {
-                type: 'video',
-                duration: 128
-              },
-              status: 0 // 未学习
-            }
-          ]
-        },
-        {
-          topic: '我认识了 Java 之后呢?',
-          sections: [
-            {
-              id: '67890',
-              title: 'Java 进阶 I',
-              desc: 'TTTTTTTTTTTTTTTTTTTTT',
-              entity: {
-                type: 'doc'
-              },
-              status: 0
-            }
-          ]
-        }
+        // {
+        //   topic: '初识 Java',
+        //   sections: [
+        //     {
+        //       id: '12345',
+        //       title: 'Java 简介 I',
+        //       desc: '本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况',
+        //       entity: {
+        //         type: 'video',
+        //         duration: 1128
+        //       },
+        //       status: 2 // 学习完成
+        //     },
+        //     {
+        //       id: '67890',
+        //       title: 'Java 简介 II',
+        //       desc: 'Testtesttest 00000',
+        //       entity: {
+        //         type: 'doc'
+        //       },
+        //       status: 1 // 正在学习
+        //     },
+        //     {
+        //       id: '12345',
+        //       title: 'Java 简介 III',
+        //       desc: 'Testtesttest description',
+        //       entity: {
+        //         type: 'video',
+        //         duration: 128
+        //       },
+        //       status: 0 // 未学习
+        //     }
+        //   ]
+        // },
+        // {
+        //   topic: '我认识了 Java 之后呢?',
+        //   sections: [
+        //     {
+        //       id: '67890',
+        //       title: 'Java 进阶 I',
+        //       desc: 'TTTTTTTTTTTTTTTTTTTTT',
+        //       entity: {
+        //         type: 'doc'
+        //       },
+        //       status: 0
+        //     }
+        //   ]
+        // }
       ]
     }
+  },
+  mounted () {
+    var courseId = this.$route.params.id;
+    axios.get("http://"+this.BASEURL+"/courseDetail?courseId="+courseId+"&studentId="+this.$getCookie("uid")).then(function(res) {
+      console.log(res);
+      this.title = res.data.title;
+      this.teacher = res.data.teacher;
+      this.content = res.data.topics;
+    }.bind(this))
+    // axios.get("http://"+this.BASEURL+"/studentProcessCourse?courseId="+courseId+"&studentId="+this.$getCookie("uid")).then(function(res) {
+    //   console.log(res);
+    //   var d = res.data.process;
+    //   for (var i = 0; i < this.content.length; i++) {
+    //     for (var j = 0; j < this.content[i].sections.length; j++) {
+    //       var thisid = this.content[i].sections[j].section_id;
+    //       var thissection = this.content[i].sections[j]
+    //       thissection.process = d[thisid]
+    //       this.content[i]
+    //     }
+    //   }
+    // }.bind(this))
   },
   created () {
     console.log(this.$route.params.id);

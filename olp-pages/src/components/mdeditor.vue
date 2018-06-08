@@ -3,6 +3,8 @@
     <link rel="stylesheet" href="/static/editor.md/css/editormd.min.css">
     <link rel="stylesheet" :href="'/static/editor.md/css/codeTheme/'+codeTheme">
     <div :id="editorId"></div>
+    <div id="md-to-html" style="display: none;">
+    </div>
   </div>
 </template>
 

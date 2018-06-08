@@ -24,19 +24,28 @@
 
 <script>
 import Header from '../components/header';
+import axios from 'axios';
 
 export default {
   name: 'Practice',
   data () {
     return {
-      id: '123124234',
-      title: '课后练习',
-      relation: 'Java 语言基础 / Java 的流控制语句 / 程序的基本思想',
-      info: '36 人完成 · 平均 90 分 · 平均用时 12 分'
+      id: '',
+      title: '',
+      relation: '',
+      info: ''
     }
   },
   created () {
     console.log(this.$route.params);
+  },
+  mounted () {
+    axios.get("http://"+this.BASEURL+"/practiceBasic?practiceId="+this.$route.params.id).then(function(res) {
+      console.log(res);
+      this.id = res.data.practice_id;
+      this.title = res.data.title;
+      this.relation = res.data.relation;
+    }.bind(this));
   },
   components: {
     'Header': Header

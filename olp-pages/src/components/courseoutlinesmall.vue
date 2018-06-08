@@ -5,10 +5,10 @@
         <div class="courseoutlinesmall-item-section-number section-number-off" v-if="section.status === 0">
           <p>{{ index+1 }}</p>
         </div>
-        <div class="courseoutlinesmall-item-section-number section-number-learning" v-if="section.status === 1">
+        <div class="courseoutlinesmall-item-section-number section-number-finish" v-else-if="section.status === 1">
           <p>{{ index+1 }}</p>
         </div>
-        <div class="courseoutlinesmall-item-section-number section-number-finish" v-if="section.status === 2">
+        <div class="courseoutlinesmall-item-section-number section-number-learning" v-else>
           <p>{{ index+1 }}</p>
         </div>
         <div class="courseoutlinesmall-item-section-title">
@@ -33,25 +33,40 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'CourseOutlineSmall',
   data () {
     return {
       sections: [
-        {
-          id: '123456787654',
-          title: 'Java 基础 1',
-          desc: '本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况',
-          entity: {
-            type: 'video',
-            length: 1182
-          },
-          status: 0
-        }
+        // {
+        //   id: '123456787654',
+        //   title: 'Java 基础 1',
+        //   desc: '本课时介绍移动开发操作系统的发展历史，对 Android 的各个版本逐一回顾，简单讲解 Android 系统的构成，帮助大家快速了解 Android 体系的整体情况',
+        //   entity: {
+        //     type: 'video',
+        //     length: 1182
+        //   },
+        //   status: 0
+        // }
       ]
     }
   },
   props: ['relatedcourse'],
+  mounted () {
+    axios.get("http://"+this.BASEURL+"/sectionList?courseId="+this.relatedcourse+"&userId="+this.$getCookie("uid")).then(function(res) {
+      console.log(res);
+      for (var i = 0; i < res.length; i++) {
+        if (res.data[i].entity.type === 0) {
+          res.data[i].entity.type = 'video';
+        } else if (res.data[i].entity.type === 1) {
+          res.data[i].entity.type = 'doc';
+        }
+      }
+      this.sections = res.data;
+    }.bind(this));
+  },
   methods: {
     parseDuration: function (dur) {
       var min = parseInt(dur/60);
@@ -99,7 +114,10 @@ a, a:hover, a:visited, a:active {
 .section-number-off {
   background-color: #bbbec4;
 }
-.section-number-on {
+.section-number-finish {
+  background-color: #19be6b;
+}
+.section-number-learning {
   background-color: #2d8cf0;
 }
 .courseoutlinesmall-item-section-number>p {

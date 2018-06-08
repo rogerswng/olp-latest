@@ -24,6 +24,9 @@
   2. if have, straight redirect to main
   3. if not, login
   */
+
+  import axios from 'axios';
+
   export default {
     name: 'Login',
     data () {
@@ -61,8 +64,26 @@
           username: username,
           password: password
         }
-        console.log(d);
+        // console.log(d);
         // POST, and CALLBACK
+        axios.post("http://"+this.BASEURL+"/login", d).then(function (res) {
+          console.log(res);
+          if(res.data.state === true) {
+            alert("登录成功！将转入个人主页");
+            // Cookie ops
+            this.$setCookie("uid", res.data.data.uid);
+            this.$setCookie("character", res.data.data.character);
+            this.$setCookie("username", res.data.data.username);
+            // console.log(res.data.data.uid, res.data.data.character, res.data.data.username);
+            if (res.data.data.character === 0) {
+              this.$router.push({path: '/studentmain'});
+            } else if (res.data.data.character === 1) {
+              this.$router.push({path: '/teachermain'});
+            }
+          } else if (res.data.state === false) {
+            alert(res.data.reason);
+          }
+        }.bind(this));
       }
     }
   }

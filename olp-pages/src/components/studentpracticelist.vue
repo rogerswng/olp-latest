@@ -14,12 +14,12 @@
           <p>{{ practice.info }}</p>
         </div>
       </div>
-      <div class="practice-status" v-if="practice.status === 0">
+      <div class="practice-status" v-if="practice.status === 0 || practice.status === 1">
         <router-link :to="{ name: 'Practice', params: {id: practice.id} }"><Button type="primary">去完成</Button></router-link>
       </div>
-      <div class="practice-status" v-else-if="practice.status === 1">
+      <div class="practice-status" v-else-if="practice.status === 2">
         <p style="color: #19be6b;">已完成</p>
-        <p>查看结果</p>
+        <p><router-link :to="{ path: '/practice/'+practice.id+'/detail' }"><span>查看结果</span></router-link></p>
       </div>
       <div class="float-clear">
       </div>
@@ -75,27 +75,42 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'StudentPracticeList',
   data () {
     return {
       practices: [
-        {
-          id: '12365',
-          title: '课后练习',
-          relation: 'Android 应用工程师职业规划 / Android 应用工程师职业规划 / Android 应用工程师职业规划',
-          info: '36 人完成 · 平均 90 分 · 平均用时 12 分钟',
-          status: 0
-        },
-        {
-          id: '123756',
-          title: '课程练习 II',
-          relation: 'TTTTEEEESSSSTTTT',
-          info: '36 人完成 · 平均 90 分 · 平均用时 12 分钟',
-          status: 1
-        }
+        // {
+        //   id: '12365',
+        //   title: '课后练习',
+        //   relation: 'Android 应用工程师职业规划 / Android 应用工程师职业规划 / Android 应用工程师职业规划',
+        //   info: '36 人完成 · 平均 90 分 · 平均用时 12 分钟',
+        //   status: 0
+        // },
+        // {
+        //   id: '123756',
+        //   title: '课程练习 II',
+        //   relation: 'TTTTEEEESSSSTTTT',
+        //   info: '36 人完成 · 平均 90 分 · 平均用时 12 分钟',
+        //   status: 1
+        // }
       ]
     }
+  },
+  mounted () {
+    axios.get("http://"+this.BASEURL+"/studentPracticeList?uid="+this.$getCookie("uid")).then(function(res) {
+      // console.log(res);
+      var p = res.data;
+      for (var i = 0; i < p.length; i++) {
+        p[i].id = p[i].practice_id;
+        p[i].title = p[i].detail.title;
+        p[i].relation = p[i].detail.relation;
+        p[i].info = '';
+      }
+      this.practices = p;
+    }.bind(this));
   }
 }
 </script>

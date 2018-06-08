@@ -28,7 +28,10 @@
         </div>
       </div>
       <div class="editSection-insert-video" style="display: block;" id="editVideo">
-        <Upload type="drag" format=".mp4, .flv">
+        <p v-if="type === 'edit'" style="text-align:left; font-size: 1.1em; font-weight: bold; padding-bottom: 10px; color: #5cadff;">
+          <a :href="this.entity.video_url" id="video_link"><span>点击这里查看已上传视频</span></a>
+        </p>
+        <Upload type="drag" :action="this.actionurl" :on-success="handleSuccess">
           <div style="padding: 20px 0;">
             <Icon type="ios-cloud-upload" size="52" style="color: #3399ff;" />
             <p>点击选择文件或拖拽文件到此处</p>
@@ -37,7 +40,7 @@
       </div>
       <div class="createsection-insert-doc" style="display: none; width: 790px;" id="editDoc">
         <!-- <mavon-editor style="height: 500px; width: 805px;" /> -->
-        <EditorMd :isView="docshow" :initData="entity.content" style="z-index: 10000;"/>
+        <EditorMd :isView="docshow" :initData="md" style="z-index: 10000;"/>
       </div>
       <div class="hr-wrap">
         <hr />
@@ -52,6 +55,7 @@ import mavonEditor from 'mavon-editor';
 import 'mavon-editor/dist/css/index.css';
 import EditorMd from './mdeditor';
 import Hub from '../assets/hub.js';
+import axios from 'axios';
 
 export default {
   name: 'TeacherSectionEdit',
@@ -60,13 +64,17 @@ export default {
       type: '',
       entity: {
         entityType: 'video',
-        url: ''
+        video_url: '',
+        md_url: '',
+        content: ''
       },
       sectionid: '',
       topicid: '',
       courseid: '',
       sectionTitle: '',
-      docshow: false
+      docshow: false,
+      md: '',
+      actionurl: "http://"+this.BASEURL+"/videoUpload"
     }
   },
   components: {
@@ -78,29 +86,41 @@ export default {
       if (this.$route.name.indexOf("TeacherSectionCreate") != -1) {
         // Create Section
         this.type = 'create';
-      } else if (this.$route.name.indexOf("TeacherSectionEdit") != -1) {
-        // Edit Section
-        this.type = 'edit';
-        this.sectionTitle = 'SectionTitle from remote server...';
-        this.sectionid = this.$route.params.sectionid;
+        this.sectionTitle = '';
+        this.sectionid = '';
         this.topicid = this.$route.params.topicid;
         this.courseid = this.$route.params.courseid;
-        // load data from remote server
-        // this.entity = {
-        //   entityType: 'doc',
-        //   content: 'asdjfhgausdyfgasdjhfbasdf'
-        // }
-        this.entity = {
-          entityType: 'video',
-          url: '1287436410283'
-        }
-        if (this.entity.entityType === 'doc') {
-          document.getElementById('editVideo').style.display = "none";
-          document.getElementById('editDoc').style.display = "block";
-          this.docshow = true;
-        } else if (this.entityType === 'video') {
+      } else if (this.$route.name.indexOf("TeacherSectionEdit") != -1) {
+        // Edit Section
+        axios.get("http://"+this.BASEURL+"/editSection?sectionId="+this.$route.params.sectionid).then(function(res) {
+          console.log(res);
+          this.sectionTitle = res.data.sectionTitle;
+          // this.entity = res.data.entity;
+          this.entity.entityType = res.data.entity.entityType;
+          this.type = 'edit';
+          this.sectionid = this.$route.params.sectionid;
+          this.topicid = this.$route.params.topicid;
+          this.courseid = this.$route.params.courseid;
 
-        }
+          console.log(this.entity);
+          if (this.entity.entityType === 'doc') {
+            // console.log(this.entity.url);
+            this.entity.md_url = res.data.entity.url;
+            this.entity.content = res.data.entity.content;
+
+            axios.get(this.entity.md_url).then(function(res) {
+              // console.log(res);
+              this.md = res.data;
+            }.bind(this));
+
+            document.getElementById('editVideo').style.display = "none";
+            document.getElementById('editDoc').style.display = "block";
+            this.docshow = true;
+          } else if (this.entity.entityType === 'video') {
+            this.entity.video_url = res.data.entity.url;
+
+          }
+        }.bind(this));
       }
     },
     handleChange: function (cur) {
@@ -114,12 +134,123 @@ export default {
       }
     },
     handleSave: function () {
-      if (this.sectionTitle === '') {
-        alert("小节名不能为空");
-      } else if (this.entity.entityType === 'video' && this.entity.url === '') {
-        alert("请上传视频");
+      if (this.type === 'create') {
+        if (this.sectionTitle === '') {
+          alert("小节名不能为空");
+          return;
+        } else if (this.entity.entityType === 'video' && this.entity.video_url === '') {
+          alert("请上传视频");
+          return;
+        } else if (this.entity.entityType === 'doc') {
+          var md = document.getElementsByName("markdown-editor-markdown-doc")[0].innerText;
+          var html = document.getElementsByName("markdown-editor-html-code")[0].innerHTML;
+          console.log(md, html);
+          this.entity.content = html;
+          axios.post("http://"+this.BASEURL+"/createMdFile",{md:md}).then(function(res) {
+            console.log(res);
+            if (res.data.success) {
+              this.entity.md_url = res.data.url;
+              var d = {
+                courseId: this.courseid,
+                topicId: this.topicid,
+                title: this.sectionTitle,
+                entity: {
+                  entityType: 'doc',
+                  url: this.entity.md_url,
+                  content: this.entity.content
+                }
+              }
+              axios.post("http://"+this.BASEURL+"/createSection", d).then(function(res) {
+                if(res.data.state === 'success') {
+                  alert("success!");
+                  this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+                }
+              }.bind(this));
+            }
+          }.bind(this));
+        }
+        if (this.entity.entityType === 'video') {
+          var d = {
+            courseId: this.courseid,
+            topicId: this.topicid,
+            title: this.sectionTitle,
+            entity: {
+              entityType: 'video',
+              url: this.entity.video_url
+            }
+          }
+          axios.post("http://"+this.BASEURL+"/createSection", d).then(function(res) {
+            if(res.data.state === 'success') {
+              alert("success!");
+              this.$router.push({path: '/teachermain/courseEdit/'+this.courseid});
+            }
+          }.bind(this));
+        }
+      } else if (this.type === 'edit') {
+        if (this.sectionTitle === '') {
+          alert("小节名不能为空");
+          return;
+        } else if (this.entity.entityType === 'video' && this.entity.video_url === '') {
+          alert("请上传视频");
+          return;
+        } else if (this.entity.entityType === 'doc') {
+          var md = document.getElementsByName("markdown-editor-markdown-doc")[0].innerText;
+          var html = document.getElementsByName("markdown-editor-html-code")[0].innerHTML;
+          this.entity.content = html;
+          axios.post("http://"+this.BASEURL+"/createMdFile", {md:md}).then(function(res) {
+            console.log(res);
+            if (res.data.success) {
+              console.log("here?")
+              this.entity.md_url = res.data.url;
+              var d = {
+                courseId: this.courseid,
+                topicId: this.topicid,
+                sectionId: this.sectionid,
+                sectionTitle: this.sectionTitle,
+                entity: {
+                  entityType: 'doc',
+                  url: this.entity.md_url,
+                  content: this.entity.content
+                }
+              }
+              axios.put("http://"+this.BASEURL+"/editSection", d).then(function(res) {
+                console.log(res);
+                if (res.data.success) {
+                  alert("Saved!");
+                  this.$router.push({path:'/teachermain/courseEdit/'+this.courseid});
+                }
+              }.bind(this));
+            }
+          }.bind(this));
+        }
+        if (this.entity.entityType === 'video') {
+          var d = {
+            courseId: this.courseid,
+            topicId: this.topicid,
+            sectionId: this.sectionid,
+            sectionTitle: this.sectionTitle,
+            entity: {
+              entityType: 'video',
+              url: this.entity.video_url
+            }
+          }
+          axios.put("http://"+this.BASEURL+"/editSection", d).then(function(res) {
+            console.log(res);
+            if (res.data.success) {
+              alert("Saved!");
+              this.$router.push({path:'/teachermain/courseEdit/'+this.courseid});
+            }
+          }.bind(this));
+        }
       }
       console.log("保存~");
+    },
+    handleSuccess: function(res) {
+      console.log(res);
+      if(res.state === "success") {
+        // console.log(res.data.url);
+        this.entity.video_url = res.url;
+      }
     }
   },
   mounted () {

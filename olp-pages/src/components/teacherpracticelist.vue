@@ -14,7 +14,7 @@
           <p>{{item.info}}</p>
         </div>
         <div class="teacherpracticelist-button-wrap">
-          <Button type="primary" size="default" @click="handleEdit($event)">编辑</Button>
+          <router-link :to="{path:'/teachermain/practiceEdit/'+item.id}"><Button type="primary" size="default" @click="handleEdit($event)">编辑</Button></router-link>
           <Button type="primary" size="default" @click="handleDetail($event)">答题情况</Button>
         </div>
         <div class="float-clear">
@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'TeacherPracticeList',
   data () {
@@ -37,24 +39,16 @@ export default {
   },
   methods: {
     initComp: function () {
-      this.practiceList = [
-        {
-          title: "课后练习",
-          relation: "Android 应用开发工程师职业规划",
-          info: "36 人完成 · 平均 90 分 · 平均用时 12 分钟",
-          id: "1234567"
-        },
-        {
-          title: "课后练习",
-          relation: "Android 应用开发工程师职业规划",
-          info: "xxxxxxx",
-          id: "34762839490"
+      axios.get("http://"+this.BASEURL+"/teacherPracticeList?uid="+this.$getCookie("uid")).then(function(res) {
+        console.log(res);
+        if (res.data.success) {
+          this.practiceList = res.data.practiceList
         }
-      ];
+      }.bind(this));
     },
     handleEdit: function(e) {
       console.log(e.path[3].dataset.pid);
-      
+
     },
     handleDetail: function(e) {
       // console.log(e.path[3].children[3].innerText);

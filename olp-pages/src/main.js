@@ -6,10 +6,12 @@ import router from './router';
 import iView from 'iview';
 // import editormd from 'editor.md'
 import 'iview/dist/styles/iview.css';
-import cookieop from './utils/cookieop'
+import cookieop from './utils/cookieop';
+import consts from './utils/consts';
 
 Vue.use(iView);
 Vue.use(cookieop);
+Vue.use(consts);
 // Vue.use(editormd);
 
 Vue.config.productionTip = false;

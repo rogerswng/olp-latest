@@ -23,6 +23,10 @@ export default {
 
     }
   },
+  mounted () {
+    console.log(this.BASEURL);
+    console.log(this.$route);
+  },
   components: {
     'Header': Header,
     'LeftNav': LeftNav

@@ -3,7 +3,11 @@
     <div class="doc-contents" id="markdown-doc-content">
       <!-- <p>目录</p> -->
     </div>
+    <div class="return-wrap" style="width: 865px; float: right; background-color: #fff;">
+      <p style="text-align:left; padding-left: 25px; padding-top: 15px; font-size: 1.2em; white-space:pre-wrap;"><router-link :to="{path: '/course/'+this.courseid}"><span><Icon type="chevron-left" />  返回课程列表</span></router-link></p>
+    </div>
     <div class="markdown-body" id="markdown-container">
+      <!-- <textarea id="html-content"></textarea> -->
     </div>
     <div class="float-clear">
     </div>
@@ -12,209 +16,46 @@
 
 <script>
 import $ from 'jquery';
+import _ from 'underscore';
 
 export default {
   name: 'DocReader',
   data () {
     return {
-      id: this.docid,
-      content: `&lt;h1&gt;Markdown 语法简介&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href="http://commonmark.org/help/" target="_blank"&gt;语法详解&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2&gt;&lt;strong&gt;粗体&lt;/strong&gt;&lt;/h2&gt;
-&lt;h3&gt;&lt;strong&gt;粗体&lt;/strong&gt;&lt;/h3&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;**粗体**
-__粗体__
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;&lt;em&gt;斜体&lt;/em&gt;&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;*斜体*
-_斜体_
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;标题&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;# 一级标题 #
-一级标题
-====
-## 二级标题 ##
-二级标题
-----
-### 三级标题 ###
-#### 四级标题 ####
-##### 五级标题 #####
-###### 六级标题 ######
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;分割线&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;***
----
-&lt;/code&gt;&lt;/pre&gt;
-&lt;hr&gt;
-&lt;h2&gt;&lt;sup&gt;上&lt;/sup&gt;角&lt;sub&gt;下&lt;/sub&gt;标&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;上角标 x^2^
-下角标 H~2~0
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;&lt;ins&gt;下划线&lt;/ins&gt; &lt;s&gt;中划线&lt;/s&gt;&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;++下划线++
-~~中划线~~
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;&lt;mark&gt;标记&lt;/mark&gt;&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;==标记==
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;段落引用&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;&amp;gt; 一级
-&amp;gt;&amp;gt; 二级
-&amp;gt;&amp;gt;&amp;gt; 三级
-...
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;列表&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;有序列表
-1.
-2.
-3.
-...
-无序列表
--
--
-...
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;任务列表&lt;/h2&gt;
-&lt;ul class="contains-task-list"&gt;
-&lt;li class="task-list-item"&gt;&lt;input class="task-list-item-checkbox" checked="" disabled="" type="checkbox"&gt; 已完成任务&lt;/li&gt;
-&lt;li class="task-list-item"&gt;&lt;input class="task-list-item-checkbox" disabled="" type="checkbox"&gt; 未完成任务&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;- [x] 已完成任务
-- [ ] 未完成任务
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;链接&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;[链接](www.baidu.com)
-![图片描述](http://www.image.com)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;代码段落&lt;/h2&gt;
-&lt;p&gt;\`\`\` type&lt;/p&gt;
-&lt;p&gt;代码段落&lt;/p&gt;
-&lt;p&gt;\`\`\`&lt;/p&gt;
-&lt;p&gt;\` 代码块 \`&lt;/p&gt;
-&lt;pre&gt;&lt;div class="hljs"&gt;&lt;code class="lang-c++"&gt;&lt;span class="hljs-function"&gt;&lt;span class="hljs-keyword"&gt;int&lt;/span&gt; &lt;span class="hljs-title"&gt;main&lt;/span&gt;&lt;span class="hljs-params"&gt;()&lt;/span&gt;
-&lt;/span&gt;{
-    &lt;span class="hljs-built_in"&gt;printf&lt;/span&gt;(&lt;span class="hljs-string"&gt;"hello world!"&lt;/span&gt;);
-}
-&lt;/code&gt;&lt;/div&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;code&lt;/code&gt;&lt;/p&gt;
-&lt;h2&gt;表格(table)&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;| 标题1 | 标题2 | 标题3 |
-| :--  | :--: | ----: |
-| 左对齐 | 居中 | 右对齐 |
-| ---------------------- | ------------- | ----------------- |
-&lt;/code&gt;&lt;/pre&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="text-align:left"&gt;标题1&lt;/th&gt;
-&lt;th style="text-align:center"&gt;标题2&lt;/th&gt;
-&lt;th style="text-align:right"&gt;标题3&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style="text-align:left"&gt;左对齐&lt;/td&gt;
-&lt;td style="text-align:center"&gt;居中&lt;/td&gt;
-&lt;td style="text-align:right"&gt;右对齐&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align:left"&gt;----------------------&lt;/td&gt;
-&lt;td style="text-align:center"&gt;-------------&lt;/td&gt;
-&lt;td style="text-align:right"&gt;-----------------&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h2&gt;脚注(footnote)&lt;/h2&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;hello[^hello]
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;见底部脚注&lt;sup class="footnote-ref"&gt;&lt;a href="#fn1" id="fnref1"&gt;[1]&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
-&lt;h2&gt;表情(emoji)&lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://www.webpagefx.com/tools/emoji-cheat-sheet/" target="_blank"&gt;参考网站: https://www.webpagefx.com/tools/emoji-cheat-sheet/&lt;/a&gt;&lt;/p&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;:laughing:
-:blush:
-:smiley:
-:)
-...
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;😆😊😃😃&lt;/p&gt;
-&lt;h2&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;mtext&gt;KaTeX&lt;/mtext&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\KaTeX&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class="katex-html" aria-hidden="true"&gt;&lt;span class="strut" style="height:0.68333em;"&gt;&lt;/span&gt;&lt;span class="strut bottom" style="height:1.0302031249999999em;vertical-align:-0.34687312499999995em;"&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="mord katex-logo"&gt;&lt;span class="k"&gt;K&lt;/span&gt;&lt;span class="a"&gt;A&lt;/span&gt;&lt;span class="t"&gt;T&lt;/span&gt;&lt;span class="e"&gt;E&lt;/span&gt;&lt;span class="x"&gt;X&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;公式&lt;/h2&gt;
-&lt;p&gt;我们可以渲染公式例如：&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;y&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;z&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;x_i + y_i = z_i&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class="katex-html" aria-hidden="true"&gt;&lt;span class="strut" style="height:0.58333em;"&gt;&lt;/span&gt;&lt;span class="strut bottom" style="height:0.7777700000000001em;vertical-align:-0.19444em;"&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;x&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.31166399999999994em;"&gt;&lt;span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.15em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mbin"&gt;+&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit" style="margin-right:0.03588em;"&gt;y&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.31166399999999994em;"&gt;&lt;span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.15em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mrel"&gt;=&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit" style="margin-right:0.04398em;"&gt;z&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.31166399999999994em;"&gt;&lt;span style="top:-2.5500000000000003em;margin-left:-0.04398em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.15em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;和&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;msubsup&gt;&lt;mo&gt;∑&lt;/mo&gt;&lt;mrow&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/msubsup&gt;&lt;msub&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\sum_{i=1}^n a_i=0&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class="katex-html" aria-hidden="true"&gt;&lt;span class="strut" style="height:0.804292em;"&gt;&lt;/span&gt;&lt;span class="strut bottom" style="height:1.104002em;vertical-align:-0.29971000000000003em;"&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="mop"&gt;&lt;span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;"&gt;∑&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.804292em;"&gt;&lt;span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;span class="mrel mtight"&gt;=&lt;/span&gt;&lt;span class="mord mathrm mtight"&gt;1&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="top:-3.2029em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;n&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.29971000000000003em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;a&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.31166399999999994em;"&gt;&lt;span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.15em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mrel"&gt;=&lt;/span&gt;&lt;span class="mord mathrm"&gt;0&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;br&gt;
-我们也可以单行渲染&lt;/p&gt;
-&lt;p&gt;&lt;span class="katex-display"&gt;&lt;span class="katex"&gt;&lt;span class="katex-mathml"&gt;&lt;math&gt;&lt;semantics&gt;&lt;mrow&gt;&lt;munderover&gt;&lt;mo&gt;∑&lt;/mo&gt;&lt;mrow&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/munderover&gt;&lt;msub&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;/msub&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;/mrow&gt;&lt;annotation encoding="application/x-tex"&gt;\sum_{i=1}^n a_i=0
-&lt;/annotation&gt;&lt;/semantics&gt;&lt;/math&gt;&lt;/span&gt;&lt;span class="katex-html" aria-hidden="true"&gt;&lt;span class="strut" style="height:1.6513970000000002em;"&gt;&lt;/span&gt;&lt;span class="strut bottom" style="height:2.929066em;vertical-align:-1.277669em;"&gt;&lt;/span&gt;&lt;span class="base"&gt;&lt;span class="mop op-limits"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:1.6513970000000002em;"&gt;&lt;span style="top:-1.872331em;margin-left:0em;"&gt;&lt;span class="pstrut" style="height:3.05em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;span class="mrel mtight"&gt;=&lt;/span&gt;&lt;span class="mord mathrm mtight"&gt;1&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="top:-3.050005em;"&gt;&lt;span class="pstrut" style="height:3.05em;"&gt;&lt;/span&gt;&lt;span&gt;&lt;span class="mop op-symbol large-op"&gt;∑&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style="top:-4.3000050000000005em;margin-left:0em;"&gt;&lt;span class="pstrut" style="height:3.05em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;n&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:1.277669em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mord"&gt;&lt;span class="mord mathit"&gt;a&lt;/span&gt;&lt;span class="msupsub"&gt;&lt;span class="vlist-t vlist-t2"&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.31166399999999994em;"&gt;&lt;span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"&gt;&lt;span class="pstrut" style="height:2.7em;"&gt;&lt;/span&gt;&lt;span class="sizing reset-size6 size3 mtight"&gt;&lt;span class="mord mathit mtight"&gt;i&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-s"&gt;​&lt;/span&gt;&lt;/span&gt;&lt;span class="vlist-r"&gt;&lt;span class="vlist" style="height:0.15em;"&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="mrel"&gt;=&lt;/span&gt;&lt;span class="mord mathrm"&gt;0&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;p&gt;具体可参照&lt;a href="http://www.intmath.com/cg5/katex-mathjax-comparison.php" target="_blank"&gt;katex文档&lt;/a&gt;和&lt;a href="https://github.com/Khan/KaTeX/wiki/Function-Support-in-KaTeX" target="_blank"&gt;katex支持的函数&lt;/a&gt;以及&lt;a href="https://math.meta.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference" target="_blank"&gt;latex文档&lt;/a&gt;&lt;/p&gt;
-&lt;h2&gt;布局&lt;/h2&gt;
-&lt;div class="hljs-left"&gt;
-&lt;p&gt;&lt;code&gt;::: hljs-left&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;居左&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;:::&lt;/code&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="hljs-center"&gt;
-&lt;p&gt;&lt;code&gt;::: hljs-center&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;居中&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;:::&lt;/code&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div class="hljs-right"&gt;
-&lt;p&gt;&lt;code&gt;::: hljs-right&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;居右&lt;/code&gt;&lt;br&gt;
-&lt;code&gt;:::&lt;/code&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;h2&gt;定义&lt;/h2&gt;
-&lt;dl&gt;
-&lt;dt&gt;术语一&lt;/dt&gt;
-&lt;dd&gt;
-&lt;p&gt;定义一&lt;/p&gt;
-&lt;/dd&gt;
-&lt;dt&gt;包含有&lt;em&gt;行内标记&lt;/em&gt;的术语二&lt;/dt&gt;
-&lt;dd&gt;
-&lt;p&gt;定义二&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;  {一些定义二的文字或代码}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;定义二的第三段&lt;/p&gt;
-&lt;/dd&gt;
-&lt;/dl&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;术语一
-
-:   定义一
-
-包含有*行内标记*的术语二
-
-:   定义二
-
-        {一些定义二的文字或代码}
-
-    定义二的第三段
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2&gt;abbr&lt;/h2&gt;
-&lt;p&gt;&lt;abbr title="Hyper Text Markup Language"&gt;HTML&lt;/abbr&gt; 规范由 &lt;abbr title="World Wide Web Consortium"&gt;W3C&lt;/abbr&gt; 维护&lt;/p&gt;
-&lt;pre&gt;&lt;code class="lang-"&gt;*[HTML]: Hyper Text Markup Language
-*[W3C]:  World Wide Web Consortium
-HTML 规范由 W3C 维护
-&lt;/code&gt;&lt;/pre&gt;
-&lt;hr class="footnotes-sep"&gt;
-&lt;section class="footnotes"&gt;
-&lt;ol class="footnotes-list"&gt;
-&lt;li id="fn1" class="footnote-item"&gt;&lt;p&gt;一个注脚 &lt;a href="#fnref1" class="footnote-backref"&gt;↩︎&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/section&gt;
-`
+      html: this.content,
     }
   },
-  props: ['docid'],
-  methods: {},
+  props: ['docid', 'content', 'courseid'],
+  methods: {
+    goAnchor: function(selector) {
+      // this.$router.beforeEach((to,from,next) => {
+      //   document.body.scrollTop = 0;
+      // });
+      var anchor = this.$el.querySelector(selector);
+      document.body.scrollTop = anchor.offsetTop;
+    }
+  },
   mounted () {
-    $('#markdown-container').html($('#markdown-container').html(this.content).text());
+    // console.log($('#markdown-container').html(this.content).text());
+    console.log($);
+    console.log(_);
+    console.log(this.html);
+    console.log(_.unescape(_.unescape(this.html)));
+    this.html = _.unescape(_.unescape(this.html))
+    // var htmlDecode = $('#markdown-container').html(this.content).text();
+    // $("#markdown-container").html(htmlDecode);
+    // $("#markdown-container").text(this.content);
+    // document.getElementById("markdown-container").innerHTML = this.content;
+    // document.getElementById("markdown-container").innerHTML = document.getElementById("markdown-container").innerText;
+    // $("#html-content").val(_.unescape(this.html));
+    $("#markdown-container").html(this.html);
     $('#markdown-container').find('h2,h3').each(function(index, item) {
       var thisId = "header-"+index;
       $(this).attr('id', thisId);
       var tagName = $(this)[0].tagName.toLowerCase();
       var headerText = $(this).text();
       var root = window.location.href;
-      var ele = "<a href='#"+thisId+"'><"+tagName+">"+headerText+"</"+tagName+"></a>";
+      var ele = "<a href='#"+thisId+"' @click='goAnchor(\"#"+thisId+"\")'><"+tagName+">"+headerText+"</"+tagName+"></a>";
       $("#markdown-doc-content").append($(ele));
     })
   }
