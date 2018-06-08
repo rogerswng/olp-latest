@@ -38,7 +38,7 @@ class Mysql(object):
         self._cursor = self._conn.cursor()
 
     @staticmethod
-    def __getConn(self):
+    def __getConn():
         """
             构造数据库连接池/获取连接
         """
@@ -60,6 +60,9 @@ class Mysql(object):
         self._cursor.execute("select @@IDENTITY as id")
         result = self._cursor.fetchall()
         return result[0]['id']
+
+    def close(self):
+        self._conn.close()
 
     def query(self, sql, params=None):
         """
@@ -131,6 +134,7 @@ class Mysql(object):
             @return insertion id
         """
         self._cursor.execute(sql, params)
+        self._conn.commit()
         return self.__getInsertId()
 
     def insertMany(self, sql, params):
@@ -141,6 +145,7 @@ class Mysql(object):
             @return insertion row affected count
         """
         count = self._cursor.executemany(sql, params)
+        self._conn.commit()
         return count
 
     def delete(self, sql, params=None):
@@ -153,6 +158,7 @@ class Mysql(object):
             count = self._cursor.execute(sql)
         else:
             count = self._cursor.execute(sql, params)
+        self._conn.commit()
         return count
 
     def modify(self, sql, params):
@@ -162,4 +168,5 @@ class Mysql(object):
             @return row affected count
         """
         count = self._cursor.execute(sql, params)
+        self._conn.commit()
         return count

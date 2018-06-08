@@ -13,6 +13,7 @@ config = {
     "host": "127.0.0.1",
     "port": 3306,
     "user": "root",
+    "password": "rootroot",
     "database": "olp",
     "charset": "utf8mb4"
 }
@@ -23,8 +24,8 @@ userSql = """
         `school_id` bigint unsigned not null,
         `password` varchar(20) not null,
         `character` int unsigned not null,
-        `course_count` int unsigned,
-        `practice_count` int unsigned,
+        `course_count` int unsigned default 0,
+        `practice_count` int unsigned default 0,
         `icon` text,
         `name` text,
         primary key (`user_id`)
@@ -39,10 +40,10 @@ courseSql = """
         `title` text not null,
         `description` text not null,
         `teacher_id` bigint unsigned not null,
-        `topic_count` int unsigned,
-        `section_count` int unsigned,
-        `practice_count` int unsigned,
-        `student_count` int unsigned,
+        `topic_count` int unsigned default 0,
+        `section_count` int unsigned default 0,
+        `practice_count` int unsigned default 0,
+        `student_count` int unsigned default 0,
         `is_valid` int unsigned not null,
         primary key (`course_id`)
     )engine=InnoDB default charset=utf8;
@@ -53,7 +54,7 @@ topicSql = """
         `topic_id` bigint unsigned not null,
         `title` text not null,
         `course_id` bigint unsigned not null,
-        `section_count` int unsigned,
+        `section_count` int unsigned default 0,
         primary key (`topic_id`)
     )engine=InnoDB default charset=utf8;
 """
@@ -89,8 +90,7 @@ studentCourseSql = """
         `course_id` bigint unsigned not null,
         `status` int unsigned not null,
         `last_section_id` bigint unsigned,
-        `process_detail` longtext,
-        primary key (`student_id`)
+        `process_detail` longtext
     )engine=InnoDB default charset=utf8;
 """
 
@@ -99,7 +99,7 @@ practiceSql = """
         `practice_id` bigint unsigned not null,
         `title` text not null,
         `teacher_id` bigint unsigned not null,
-        `relation` int unsigned,
+        `relation` int unsigned default 3,
         `topic_id` bigint unsigned,
         `section_id` bigint unsigned,
         `course_id` bigint unsigned,
@@ -128,8 +128,7 @@ studentPracticeSql = """
         `status` int unsigned not null,
         `draft` longtext,
         `score` int unsigned,
-        `duration` int unsigned,
-        primary key (`student_id`)
+        `duration` int unsigned
     )engine=InnoDB default charset=utf8;
 """
 # status 0-new 1-draft 2-finished
@@ -154,6 +153,24 @@ class DbInitilization(object):
         count = self._cursor.execute(sql)
         return "success"
 
+    def initData(self):
+        """
+            @Summary: Initialize User data
+            @param sql, params
+            @return
+        """
+        self._cursor.execute(
+            """
+            insert into User (`user_id`,`school_id`,`password`,`character`,`course_count`,`practice_count`,`name`) values (4100166105996197889,2014211395,"teststudent",0,0,0,"测试-学生");
+            """
+        )
+        self._cursor.execute(
+            """
+            insert into User (`user_id`,`school_id`,`password`,`character`,`course_count`,`practice_count`,`name`) values (4100166391997399041,1234567890,"testteacher",0,0,0,"测试-老师");
+            """
+        )
+        self._conn.commit()
+
 if __name__ == "__main__":
     db = DbInitilization()
     db.createTable(userSql)
@@ -165,3 +182,4 @@ if __name__ == "__main__":
     db.createTable(practiceSql)
     db.createTable(problemSql)
     db.createTable(studentPracticeSql)
+    db.initData()

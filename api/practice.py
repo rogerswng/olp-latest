@@ -2,7 +2,9 @@
 from flask import request
 from flask.ext.restful import Resource
 from uuid import uuid4
-from app import db
+from dbop import Mysql
+import json
+# from app import db
 import snowflake.client
 
 # -*- API LIST -*-
@@ -14,158 +16,607 @@ import snowflake.client
 def get_id():
     return snowflake.client.get_guid()
 
-class TeacherPracticeList(Resource):
-    def get(self):
-        userId = request.args.get("userId")
+class EditProblem(Resource):
+    def put(self):
+        data = request.get_json() or request.form
+        practiceId = int(data["practiceId"])
+        problemId = int(data["problemId"])
+        position = data["index"]
+        content = data["content"]
+        choices = data["choices"]
+        answer = data["answer"]
 
-        practiceCount = db.getOne(
+        db = Mysql()
+
+        # Edit Problem
+        choices = json.dumps(choices)
+        db.modify(
             """
-            select practice_count from User where user_id=%s;
-            """,
-            (userId,)
-        )['practice_count']
+            update Problem set position=%s,content=%s,choices=%s,answer=%s where problem_id=%s;
+            """, (position,content,choices,answer,problemId)
+        )
+        # Reset Status of Practice
+        sl = db.getAll(
+            """
+            select student_id from StudentPractice where practice_id=%s;
+            """, (practiceId,)
+        )
+        if sl:
+            for student in sl:
+                id = student["student_id"]
+                db.modify(
+                    """
+                    update StudentPractice set status=0 where student_id=%s and practice_id=%s;
+                    """, (id,practiceId)
+                )
 
-        if practiceCount <= 5:
-            page = 0
-            res = db.getAll(
-                """
-                select * from Practice where teacher_id=%s;
-                """,
-                (userId,)
-            )
-        else:
-            page = practiceCount/5+1 if practice%5 else practiceCount/5
-            res = db.getSome(
-                """
-                select * from Practice where teacher_id=%s;
-                """, 5, (userId,)
-            )
+        p = db.getAll(
+            """
+            select * from Problem where practice_id=%s;
+            """, (practiceId,)
+        )
+        pl = []
 
-        respData = {
-            "state": "success",
-            "count": practiceCount if practiceCount<5 else 5,
-            "page": page,
-            "detail": res
+        for each in p:
+            ch = json.loads(each["choices"])
+            d = {
+                "id": str(each["problem_id"]),
+                "problem": each["content"],
+                "choices": [{"cid": i, "value": ch[i]} for i in range(0, len(ch))],
+                "correctAnswer": each["answer"]
+            }
+            pl.append(d)
+
+        return {
+            "success": True,
+            "problemList": pl
         }
 
-        return respData
+    def delete(self):
+        problemId = int(request.args.get("problemId"))
+
+        db = Mysql()
+
+        # Get practice
+        practiceId = db.getOne(
+            """
+            select practice_id from Problem where problem_id=%s;
+            """, (problemId,)
+        )["practice_id"]
+
+        # Delete Problem
+        db.delete(
+            """
+            delete from Problem where problem_id=%s;
+            """, (problemId,)
+        )
+
+        # Reset Status of Practice
+        sl = db.getAll(
+            """
+            select student_id from StudentPractice where practice_id=%s;
+            """, (practiceId,)
+        )
+        if sl:
+            for student in sl:
+                id = student["student_id"]
+                db.modify(
+                    """
+                    update StudentPractice set status=0 where student_id=%s and practice_id=%s;
+                    """, (id,practiceId)
+                )
+
+        p = db.getAll(
+            """
+            select * from Problem where practice_id=%s;
+            """, (practiceId,)
+        )
+        pl = []
+
+        for each in p:
+            ch = json.loads(each["choices"])
+            d = {
+                "id": str(each["problem_id"]),
+                "problem": each["content"],
+                "choices": [{"cid": i, "value": ch[i]} for i in range(0, len(ch))],
+                "correctAnswer": each["answer"]
+            }
+            pl.append(d)
+
+        return {
+            "success": True,
+            "problemList": pl
+        }
+
+class CreateProblem(Resource):
+    def post(self):
+        data = request.get_json() or request.form
+        practiceId = int(data["practiceId"])
+        position = data["index"]
+        content = data["content"]
+        choices = data["choices"]
+        answer = data["answer"]
+
+        problemId = get_id()
+
+        db = Mysql()
+
+        # Handle choice list -> json str
+        choices = json.dumps(choices)
+
+        db.insertOne(
+            """
+            insert into Problem (`problem_id`,`position`,`content`,`choices`,`answer`,`practice_id`) values (%s,%s,%s,%s,%s,%s);;
+            """, (problemId,position,content,choices,answer,practiceId)
+        )
+        # Get Students list and reset the status of practice
+        sl = db.getAll(
+            """
+            select student_id from StudentPractice where practice_id=%s;
+            """, (practiceId,)
+        )
+        if sl:
+            # Has student
+            for student in sl:
+                id = student["student_id"]
+                db.modify(
+                    """
+                    update StudentPractice set status=0 where practice_id=%s and student_id=%s;
+                    """, (practiceId, id)
+                )
+
+
+        p = db.getAll(
+            """
+            select * from Problem where practice_id=%s;
+            """, (practiceId,)
+        )
+        pl = []
+
+        for each in p:
+            ch = json.loads(each["choices"])
+            d = {
+                "id": str(each["problem_id"]),
+                "problem": each["content"],
+                "choices": [{"cid": i, "value": ch[i]} for i in range(0, len(ch))],
+                "correctAnswer": each["answer"]
+            }
+            pl.append(d)
+
+        return {
+            "success": True,
+            "problemList": pl
+        }
+
+class EditPractice(Resource):
+    def get(self):
+        practiceId = int(request.args.get("practiceId"))
+
+        db = Mysql()
+
+        p = db.getOne(
+            """
+            select * from Practice where practice_id=%s;
+            """, (practiceId,)
+        )
+        problems = db.getAll(
+            """
+            select * from Problem where practice_id=%s;
+            """, (practiceId,)
+        )
+        pl = []
+        if problems:
+            # Has Problems
+            for each in problems:
+                choices = json.loads(each["choices"])
+                d = {
+                    "id": str(each["problem_id"]),
+                    "problem": each["content"],
+                    "choices": [{"cid": i, "value": choices[i]} for i in range(0, len(choices))],
+                    "correctAnswer": each["answer"]
+                }
+                pl.append(d)
+        else:
+            # No Problems
+            pl = []
+
+        return {
+            "success": True,
+            "title": p["title"],
+            "problemList": pl
+        }
+
+    def put(self):
+        data = request.get_json() or request.form
+        practiceId = int(data["practiceId"])
+        title = data["title"]
+
+        db = Mysql()
+
+        db.modify(
+            """
+            update Practice set title=%s where practice_id=%s;
+            """, (title,practiceId)
+        )
+        # Relation modify here
+
+        return {
+            "success": True
+        }
+
+class PracticeBasic(Resource):
+    def get(self):
+        practiceId = int(request.args.get("practiceId"))
+
+        db = Mysql()
+
+        d = db.getOne(
+            """
+            select * from Practice where practice_id=%s;
+            """, (practiceId,)
+        )
+        print (d)
+
+        d["practice_id"] = str(d["practice_id"])
+        d["teacher_id"] = str(d["teacher_id"])
+
+        relation = d["relation"]
+
+        if relation == 0:
+            courseTitle = db.getOne(
+                """
+                select title from Course where course_id=%s;
+                """, (d["course_id"],)
+            )["title"]
+            d["relation"] = courseTitle
+            d["course_id"] = str(d["course_id"])
+        elif relation == 1:
+            courseTitle = db.getOne(
+                """
+                select title from Course where course_id=%s;
+                """, (d["course_id"],)
+            )["title"]
+            topicTitle = db.getOne(
+                """
+                select title from Topic where topic_id=%s;
+                """, (d["topic_id"],)
+            )["title"]
+            d["relation"] = "{} / {}".format(courseTitle, topicTitle)
+            d["course_id"] = str(d["course_id"])
+            d["topic_id"] = str(d["topic_id"])
+        elif relation == 2:
+            courseTitle = db.getOne(
+                """
+                select title from Course where course_id=%s;
+                """, (d["course_id"],)
+            )["title"]
+            topicTitle = db.getOne(
+                """
+                select title from Topic where topic_id=%s;
+                """, (d["topic_id"],)
+            )["title"]
+            sectionTitle = db.getOne(
+                """
+                select title from Section where section_id=%s;
+                """, (d["section_id"],)
+            )["title"]
+            d["relation"] = "{} / {} / {}".format(courseTitle, topicTitle, sectionTitle)
+            d["course_id"] = str(d["course_id"])
+            d["topic_id"] = str(d["topic_id"])
+            d["section_id"] = str(d["section_id"])
+
+        return d
+
+class TeacherPracticeList(Resource):
+    def get(self):
+        uid = int(request.args.get("uid"))
+
+        db = Mysql()
+
+        p = db.getAll(
+            """
+            select * from Practice where teacher_id=%s;
+            """, (uid,)
+        )
+        pl = []
+        for each in p:
+            # format relation string
+            r = each["relation"]
+
+            if r == 0:
+                relation = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (each["course_id"],)
+                )["title"]
+            elif r == 1:
+                courseTitle = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (each["course_id"],)
+                )["title"]
+                topicTitle = db.getOne(
+                    """
+                    select title from Topic where topic_id=%s;
+                    """, (each["topic_id"],)
+                )["title"]
+                relation = "{} / {}".format(courseTitle, topicTitle)
+            elif r == 2:
+                courseTitle = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (each["course_id"],)
+                )["title"]
+                topicTitle = db.getOne(
+                    """
+                    select title from Topic where topic_id=%s;
+                    """, (each["topic_id"],)
+                )["title"]
+                sectionTitle = db.getOne(
+                    """
+                    select title from Section where section_id=%s;
+                    """, (each["section_id"],)
+                )["title"]
+                relation = "{} / {} / {}".format(courseTitle,topicTitle,sectionTitle)
+            else:
+                relation = ""
+
+            d = {
+                "title": each["title"],
+                "relation": relation,
+                "id": str(each["practice_id"])
+            }
+
+            pl.append(d)
+
+
+        return {
+            "success": True,
+            "practiceList": pl
+        }
 
 class StudentPracticeList(Resource):
     def get(self):
-        userId = request.args.get("userId")
+        uid = request.args.get("uid")
 
-        practiceCount = db.getOne(
+        # practiceCount = db.getOne(
+        #     """
+        #     select practice_count from User where user_id=%s;
+        #     """, (userId,)
+        # )['practice_count']
+        #
+        # if practiceCount < 5:
+        #     page = 0
+        #     res = db.getAll(
+        #         """
+        #         select * from StudentPractice where student_id=%s;
+        #         """, (userId,)
+        #     )
+        # else:
+        #     page = practiceCount/5+1 if practiceCount%5 else practiceCount/5
+        #     res = db.getSome(
+        #         """
+        #         select * from StudentPractice where student_id=%s;
+        #         """, 5, (userId,)
+        #     )
+        db = Mysql()
+
+        # Get practice list
+        practices = db.getAll(
             """
-            select practice_count from User where user_id=%s;
-            """, (userId,)
-        )['practice_count']
+            select * from StudentPractice where student_id=%s;
+            """, (uid,)
+        )
 
-        if practiceCount < 5:
-            page = 0
-            res = db.getAll(
+        for practice in practices:
+            practiceId = practice["practice_id"]
+            practiceInfo = db.getOne(
                 """
-                select * from StudentPractice where student_id=%s;
-                """, (userId,)
+                select * from Practice where practice_id=%s;
+                """,(practiceId,)
             )
-        else:
-            page = practiceCount/5+1 if practiceCount%5 else practiceCount/5
-            res = db.getSome(
-                """
-                select * from StudentPractice where student_id=%s;
-                """, 5, (userId,)
-            )
+            relation = practiceInfo["relation"]
 
-        respData = {
-            "state": "success",
-            "count": practiceCount if practiceCount<5 else 5,
-            "page": page,
-            "detail": res
-        }
+            if relation == 0:
+                # related with course
+                courseTitle = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (practiceInfo["course_id"],)
+                )["title"]
+                practiceInfo["relation"] = courseTitle
+                practiceInfo["course_id"] = str(practiceInfo["course_id"])
+            elif relation == 1:
+                # related with topic
+                courseTitle = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (practiceInfo["course_id"],)
+                )["title"]
+                topicTitle = db.getOne(
+                    """
+                    select title from Topic where topic_id=%s;
+                    """, (practiceInfo["topic_id"],)
+                )["title"]
+                practiceInfo["relation"] = "{} / {}".format(courseTitle, topicTitle)
+                practiceInfo["course_id"] = str(practiceInfo["course_id"])
+                practiceInfo["topic_id"] = str(practiceInfo["topic_id"])
+            elif relation == 2:
+                # related with section
+                courseTitle = db.getOne(
+                    """
+                    select title from Course where course_id=%s;
+                    """, (practiceInfo["course_id"],)
+                )["title"]
+                topicTitle = db.getOne(
+                    """
+                    select title from Topic where topic_id=%s;
+                    """, (practiceInfo["topic_id"],)
+                )["title"]
+                sectionTitle = db.getOne(
+                    """
+                    select title from Section where section_id=%s;
+                    """, (practiceInfo["section_id"],)
+                )["title"]
+                practiceInfo["relation"] = "{} / {} / {}".format(courseTitle, topicTitle, sectionTitle)
+                practiceInfo["course_id"] = str(practiceInfo["course_id"])
+                practiceInfo["topic_id"] = str(practiceInfo["topic_id"])
+                practiceInfo["section_id"] = str(practiceInfo["section_id"])
+
+
+            practiceInfo["practice_id"] = str(practiceInfo["practice_id"])
+            practiceInfo["teacher_id"] = str(practiceInfo["teacher_id"])
+
+            practice["detail"] = practiceInfo
+            practice["practice_id"] = str(practice["practice_id"])
+            practice["student_id"] = str(practice["student_id"])
+
+
+        respData = practices
 
         return respData
+
 
 class CreatePractice(Resource):
     def post(self):
         data = request.get_json() or request.form
-        userId = data['userId']
-        title = data['title']
-        problemList = data['problems']
-        relation = data['relation']
-        topicId = data['topicId']
-        sectionId = data['sectionId']
-        courseId = data['courseId']
+        userId = int(data["userId"])
+        title = data["title"]
+
+        db = Mysql()
 
         practiceId = get_id()
 
         db.insertOne(
             """
-            insert into Practice (practice_id, title, teacher_id, relation, topic_id, section_id, course_id)
-            values (%s, %s, %s, %s, %s, %s, %s);
-            """, (practiceId, title, userId, relation, topicId, sectionId, courseId)
+            insert into Practice (`practice_id`,`title`,`teacher_id`) values (%s,%s,%s);
+            """,(practiceId,title,userId)
         )
 
-        position = 0
-
-        for eachp in problemList:
-            problemId = get_id()
-
-            content = eachp['content']
-            choices = eachp['choices']
-            answer = eachp['answer']
-
-            db.insertOne(
-                """
-                insert into Problem (problem_id, position, content, choices, answer, practice_id)
-                values (%s, %s, %s, %s, %s, %s);
-                """, (problemId, position, content, choices, answer, practiceId)
-            )
-
-            position += 1
-
-        studentList = db.getAll(
+        db.modify(
             """
-            select student_id from StudnetCourse where course_id=%s;
-            """, (courseId)
+            update User set practice_count=practice_count+1 where user_id=%s;
+            """,(userId,)
         )
-
-        for each in studentList:
-            db.insertOne(
-                """
-                insert into StudentPractice (student_id, practice_id, status)
-                values (%s, %s, %s);
-                """, (each['student_id'], practiceId, 0)
-            )
-            db.modify(
-                """
-                update User set practice_count=practice_count+1 where user_id=%s;
-                """, (each['student_id'],)
-            )
 
         return {
-            "state": "success"
+            "state": "success",
+            "id": str(practiceId)
         }
+
+# class CreatePractice(Resource):
+#     def post(self):
+#         data = request.get_json() or request.form
+#         userId = data['userId']
+#         title = data['title']
+#         problemList = data['problems']
+#         relation = data['relation']
+#         topicId = data['topicId']
+#         sectionId = data['sectionId']
+#         courseId = data['courseId']
+#
+#         practiceId = get_id()
+#
+#         db.insertOne(
+#             """
+#             insert into Practice (practice_id, title, teacher_id, relation, topic_id, section_id, course_id)
+#             values (%s, %s, %s, %s, %s, %s, %s);
+#             """, (practiceId, title, userId, relation, topicId, sectionId, courseId)
+#         )
+#
+#         position = 0
+#
+#         for eachp in problemList:
+#             problemId = get_id()
+#
+#             content = eachp['content']
+#             choices = eachp['choices']
+#             answer = eachp['answer']
+#
+#             db.insertOne(
+#                 """
+#                 insert into Problem (problem_id, position, content, choices, answer, practice_id)
+#                 values (%s, %s, %s, %s, %s, %s);
+#                 """, (problemId, position, content, choices, answer, practiceId)
+#             )
+#
+#             position += 1
+#
+#         studentList = db.getAll(
+#             """
+#             select student_id from StudnetCourse where course_id=%s;
+#             """, (courseId)
+#         )
+#
+#         for each in studentList:
+#             db.insertOne(
+#                 """
+#                 insert into StudentPractice (student_id, practice_id, status)
+#                 values (%s, %s, %s);
+#                 """, (each['student_id'], practiceId, 0)
+#             )
+#             db.modify(
+#                 """
+#                 update User set practice_count=practice_count+1 where user_id=%s;
+#                 """, (each['student_id'],)
+#             )
+#
+#         return {
+#             "state": "success"
+#         }
 
 class FetchProblems(Resource):
     def get(self):
-        practiceId = data['practiceId']
-        userId = data['userId']
+        practiceId = request.args.get('practiceId')
+        uid = request.args.get("uid")
+
+        db = Mysql()
 
         draft = db.getOne(
             """
             select * from StudentPractice where student_id=%s and practice_id=%s;
-            """, (userId, practiceId)
+            """, (uid, practiceId)
         )
-
         problemSet = db.getAll(
             """
-            select * from Problem where practice_id=%s;
+            select problem_id as id, position, content, choices from Problem where practice_id=%s;
             """, (practiceId,)
         )
 
+        status = draft["status"]
+        # problemSet["status"] = status
+
+        if status == 0:
+            for problem in problemSet:
+                problem["status"] = 0
+                problem["choices"] = json.loads(problem["choices"])
+                problem["id"] = str(problem["id"])
+        elif status == 1:
+            d = eval(draft["draft"])
+            for problem in problemSet:
+                id = problem["id"]
+                problem["status"] = 1
+                problem["choices"] = json.loads(problem["choices"])
+                problem["draft"] = d[id]
+                problem["id"] = str(problem["id"])
+        elif status == 2:
+            d = eval(draft["draft"])
+            for problem in problemSet:
+                id = problem["id"]
+                problem["status"] = 2
+                problem["choices"] = json.loads(problem["choices"])
+                problem["draft"] = d[id]
+                answer = db.getOne(
+                    """
+                    select answer from Problem where problem_id=%s;
+                    """, (problem["id"],)
+                )["answer"]
+                problem["correctAnswer"] = problem["choices"].index(answer)
+                problem["id"] = str(problem["id"])
+
         respData = {
-            "state": "success",
-            "problemSet": problemSet,
-            "draft": draft
+            "problemSet":problemSet,
+            "status": status
         }
 
         return respData
@@ -211,20 +662,62 @@ class UploadPractice(Resource):
 
         return respData
 
-class SavePracticeDraft(Resource):
+class MarkPractice(Resource):
     def post(self):
         data = request.get_json() or request.form
-        userId = data['userId']
-        detail = data['detail']
-        duration = data['duration']
+        uid = int(data["uid"])
+        practiceId = int(data["practiceId"])
+        p = data["problems"]
+
+        db = Mysql()
+
+        # Get correct answer list
+        d = db.getAll(
+            """
+            select problem_id as id, answer, choices from Problem where practice_id=%s;
+            """, (practiceId,)
+        )
+        cl = {}
+        for problem in d:
+            problem["choices"] = json.loads(problem["choices"])
+            # value not index
+            cl[problem["id"]] = problem["choices"].index(problem["answer"])
+
+        # Handle format of post data & save draft into a dict
+        draft = {}
+        for problem in p:
+            pid = int(problem["id"])
+            problem["status"] = 2
+            problem["correctAnswer"] = cl[pid]
+            draft[pid] = problem["draft"]
 
         db.modify(
             """
-            update StudentPractice set status=%s, draft=%s, duration=%s where student_id=%s and practice_id=%s;
-            """, (1, detail, duration, student_id, practice_id=%s)
+            update StudentPractice set status=2,draft=%s where student_id=%s and practice_id=%s;
+            """, (str(draft),uid,practiceId)
         )
 
-        respData = {
-            "state": "success",
-            "detail": detail
-        }
+        return p
+
+
+class SavePracticeDraft(Resource):
+    def post(self):
+        data = request.get_json() or request.form
+        uid = int(data["uid"])
+        practiceId = int(data["practiceId"])
+        p = data["problems"]
+
+        db = Mysql()
+
+        draft = {}
+        for problem in p:
+            pid = int(problem["id"])
+            draft[pid] = problem["draft"]
+
+        db.modify(
+            """
+            update StudentPractice set status=1,draft=%s where student_id=%s and practice_id=%s;
+            """, (str(draft),uid,practiceId)
+        )
+
+        return {"success": True}

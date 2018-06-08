@@ -5,8 +5,8 @@
 """
 
 DBHOST = "localhost"
-DBPORT = "3306"
+DBPORT = 3306
 DBUSER = "root"
-# DBPSWD = "rootroot"
+DBPSWD = "rootroot"
 DBNAME = "olp"
 DBCHARSET = "utf8"
