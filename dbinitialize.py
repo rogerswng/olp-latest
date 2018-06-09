@@ -124,7 +124,7 @@ problemSql = """
 studentPracticeSql = """
     create table if not exists `StudentPractice` (
         `student_id` bigint unsigned not null,
-        `pracitce_id` bigint unsigned not null,
+        `practice_id` bigint unsigned not null,
         `status` int unsigned not null,
         `draft` longtext,
         `score` int unsigned,
@@ -166,7 +166,7 @@ class DbInitilization(object):
         )
         self._cursor.execute(
             """
-            insert into User (`user_id`,`school_id`,`password`,`character`,`course_count`,`practice_count`,`name`) values (4100166391997399041,1234567890,"testteacher",0,0,0,"测试-老师");
+            insert into User (`user_id`,`school_id`,`password`,`character`,`course_count`,`practice_count`,`name`) values (4100166391997399041,1234567890,"testteacher",1,0,0,"测试-老师");
             """
         )
         self._conn.commit()
